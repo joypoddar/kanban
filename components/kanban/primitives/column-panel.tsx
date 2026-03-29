@@ -13,6 +13,7 @@ import {
 import { mergeProps, useRender } from "@base-ui/react"
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
+import * as React from "react"
 
 // ─────────────────────────────────────────────
 // Variants
@@ -54,13 +55,26 @@ const columnVariantClasses = cva(
 )
 
 // ─────────────────────────────────────────────
+// Context
+// ─────────────────────────────────────────────
+
+interface ColumnPanelContextValue {
+  collapsed: boolean
+  onToggle?: () => void
+}
+
+const ColumnPanelContext = React.createContext<ColumnPanelContextValue>({
+  collapsed: false,
+})
+
+// ─────────────────────────────────────────────
 // ColumnPanel
 // ─────────────────────────────────────────────
 
 function ColumnPanelPrimitive({
   render,
   ...otherProps
-}: Omit<ColumnPanelProps, "variant" | "collapsed">) {
+}: Omit<ColumnPanelProps, "variant" | "collapsed" | "onToggle">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -69,18 +83,24 @@ function ColumnPanelPrimitive({
 }
 
 function ColumnPanel({
-  variant = "default",
+  variant,
   collapsed = false,
+  onToggle,
   className,
+  children,
   ...props
 }: ColumnPanelProps) {
   return (
-    <ColumnPanelPrimitive
-      data-slot="column-panel"
-      data-collapsed={collapsed}
-      className={cn(columnVariantClasses({ variant, collapsed }), className)}
-      {...props}
-    />
+    <ColumnPanelContext.Provider value={{ collapsed, onToggle }}>
+      <ColumnPanelPrimitive
+        data-slot="column-panel"
+        data-collapsed={collapsed}
+        className={cn(columnVariantClasses({ variant, collapsed }), className)}
+        {...props}
+      >
+        {children}
+      </ColumnPanelPrimitive>
+    </ColumnPanelContext.Provider>
   )
 }
 
@@ -97,11 +117,27 @@ function ColumnHeaderPrimitive({ render, ...otherProps }: ColumnHeaderProps) {
 }
 
 function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
+  const { collapsed, onToggle } = React.useContext(ColumnPanelContext)
+  const isHeaderTrigger = collapsed
+
   return (
     <ColumnHeaderPrimitive
       data-slot="column-header"
+      role={isHeaderTrigger ? "button" : undefined}
+      tabIndex={isHeaderTrigger ? 0 : undefined}
+      aria-expanded={isHeaderTrigger ? !collapsed : undefined}
+      aria-label={isHeaderTrigger ? "Expand column" : undefined}
+      onClick={isHeaderTrigger ? onToggle : undefined}
+      onKeyDown={
+        isHeaderTrigger
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") onToggle?.()
+            }
+          : undefined
+      }
       className={cn(
-        "@container/column-header flex items-center justify-between p-4",
+        "@container/column-header flex items-center justify-between p-4 pb-2",
+        isHeaderTrigger && "cursor-pointer select-none",
         className
       )}
       {...props}
@@ -235,13 +271,9 @@ function ColumnTogglePrimitive({
   })
 }
 
-function ColumnToggle({
-  collapsed = false,
-  className,
-  children,
-  onToggle,
-  ...props
-}: ColumnToggleProps) {
+function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
+  const { collapsed, onToggle } = React.useContext(ColumnPanelContext)
+
   return (
     <ColumnTogglePrimitive
       data-slot="column-toggle"
