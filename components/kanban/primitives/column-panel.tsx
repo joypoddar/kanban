@@ -67,6 +67,10 @@ const ColumnPanelContext = React.createContext<ColumnPanelContextValue>({
   collapsed: false,
 })
 
+function useColumnToggle() {
+  return React.useContext(ColumnPanelContext)
+}
+
 // ─────────────────────────────────────────────
 // ColumnPanel
 // ─────────────────────────────────────────────
@@ -117,7 +121,7 @@ function ColumnHeaderPrimitive({ render, ...otherProps }: ColumnHeaderProps) {
 }
 
 function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
-  const { collapsed, onToggle } = React.useContext(ColumnPanelContext)
+  const { collapsed, onToggle } = useColumnToggle()
   const isHeaderTrigger = collapsed
 
   return (
@@ -272,7 +276,7 @@ function ColumnTogglePrimitive({
 }
 
 function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
-  const { collapsed, onToggle } = React.useContext(ColumnPanelContext)
+  const { collapsed, onToggle } = useColumnToggle()
 
   return (
     <ColumnTogglePrimitive
@@ -299,6 +303,10 @@ function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
   )
 }
 
+// ─────────────────────────────────────────────
+// Exports
+// ─────────────────────────────────────────────
+
 export {
   ColumnPanel,
   ColumnHeader,
@@ -307,4 +315,5 @@ export {
   ColumnToggle,
   ColumnContent,
   ColumnFooter,
+  useColumnToggle,
 }
