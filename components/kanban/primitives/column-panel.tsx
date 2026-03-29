@@ -11,7 +11,7 @@ import {
   ColumnToggleProps,
 } from "@/types/column-panel"
 import { mergeProps, useRender } from "@base-ui/react"
-import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react"
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
 
 // ─────────────────────────────────────────────
@@ -101,7 +101,7 @@ function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
     <ColumnHeaderPrimitive
       data-slot="column-header"
       className={cn(
-        "@container/column-header flex items-center justify-between p-4 pb-2",
+        "@container/column-header flex items-center justify-between p-4",
         className
       )}
       {...props}
@@ -204,7 +204,7 @@ function ColumnAction({ className, ...props }: ColumnActionProps) {
   return (
     <ColumnActionPrimitive
       data-slot="column-action"
-      className={cn("ml-2 flex shrink-0 items-center gap-1", className)}
+      className={cn("flex shrink-0 items-center gap-1", className)}
       {...props}
     />
   )
@@ -261,7 +261,7 @@ function ColumnToggle({
         (collapsed ? (
           <CaretRightIcon className="h-4 w-4" />
         ) : (
-          <CaretDownIcon className="h-4 w-4" />
+          <CaretLeftIcon className="h-4 w-4" />
         ))}
     </ColumnTogglePrimitive>
   )
