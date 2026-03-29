@@ -15,7 +15,7 @@ import { PlusIcon } from "@phosphor-icons/react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 // ─────────────────────────────────────────────
-// Variants
+// KanbanCard
 // ─────────────────────────────────────────────
 
 const cardVariants = cva(
@@ -38,10 +38,6 @@ const cardVariants = cva(
     },
   }
 )
-
-// ─────────────────────────────────────────────
-// KanbanCard
-// ─────────────────────────────────────────────
 
 function KanbanCardPrimitive({
   render,
@@ -180,10 +176,26 @@ function KanbanCardFooter({ className, ...props }: KanbanCardFooterProps) {
 // KanbanScrollArea
 // ─────────────────────────────────────────────
 
+const scrollAreaVariants = cva(
+  "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border flex-1 overflow-auto",
+  {
+    variants: {
+      axis: {
+        vertical: "overflow-x-hidden overflow-y-auto",
+        horizontal: "overflow-x-auto overflow-y-hidden",
+        both: "overflow-auto",
+      },
+    },
+    defaultVariants: {
+      axis: "vertical",
+    },
+  }
+)
+
 function KanbanScrollAreaPrimitive({
   render,
   ...otherProps
-}: KanbanScrollAreaProps) {
+}: Omit<KanbanScrollAreaProps, "axis">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -191,15 +203,15 @@ function KanbanScrollAreaPrimitive({
   })
 }
 
-function KanbanScrollArea({ className, ...props }: KanbanScrollAreaProps) {
+function KanbanScrollArea({
+  axis,
+  className,
+  ...props
+}: KanbanScrollAreaProps & VariantProps<typeof scrollAreaVariants>) {
   return (
     <KanbanScrollAreaPrimitive
       data-slot="kanban-scroll-area"
-      className={cn(
-        "flex-1 overflow-x-hidden overflow-y-auto",
-        "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border",
-        className
-      )}
+      className={cn(scrollAreaVariants({ axis }), className)}
       {...props}
     />
   )
@@ -209,6 +221,24 @@ function KanbanScrollArea({ className, ...props }: KanbanScrollAreaProps) {
 // KanbanAddCard
 // ─────────────────────────────────────────────
 
+const addCardVariants = cva(
+  "mt-2 flex w-full items-center gap-2 rounded-lg border p-3 text-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
+  {
+    variants: {
+      variant: {
+        dashed:
+          "border-dashed border-border text-muted-foreground hover:border-foreground/20 hover:bg-muted hover:text-foreground",
+        solid: "border-border bg-muted text-foreground hover:bg-muted/80",
+        ghost:
+          "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "dashed",
+    },
+  }
+)
+
 function KanbanAddCardPrimitive({ render, ...otherProps }: KanbanAddCardProps) {
   return useRender({
     defaultTagName: "button",
@@ -217,19 +247,16 @@ function KanbanAddCardPrimitive({ render, ...otherProps }: KanbanAddCardProps) {
   })
 }
 
-function KanbanAddCard({ className, children, ...props }: KanbanAddCardProps) {
+function KanbanAddCard({
+  variant,
+  className,
+  children,
+  ...props
+}: KanbanAddCardProps & VariantProps<typeof addCardVariants>) {
   return (
     <KanbanAddCardPrimitive
       data-slot="kanban-add-card"
-      className={cn(
-        "mt-2 flex w-full items-center gap-2 p-3",
-        "text-sm text-muted-foreground",
-        "rounded-lg border border-dashed border-border",
-        "hover:border-foreground/20 hover:bg-muted hover:text-foreground",
-        "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
-        "transition-colors",
-        className
-      )}
+      className={cn(addCardVariants({ variant }), className)}
       {...props}
     >
       {children ?? (
@@ -246,6 +273,23 @@ function KanbanAddCard({ className, children, ...props }: KanbanAddCardProps) {
 // KanbanBadge
 // ─────────────────────────────────────────────
 
+const badgeVariants = cva(
+  "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-2 py-1 text-xs font-medium",
+  {
+    variants: {
+      variant: {
+        default: "bg-muted text-muted-foreground",
+        success: "bg-success/10 text-success",
+        warning: "bg-warning/10 text-warning",
+        destructive: "bg-destructive/10 text-destructive",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function KanbanBadgePrimitive({ render, ...otherProps }: KanbanBadgeProps) {
   return useRender({
     defaultTagName: "span",
@@ -254,17 +298,15 @@ function KanbanBadgePrimitive({ render, ...otherProps }: KanbanBadgeProps) {
   })
 }
 
-function KanbanBadge({ className, ...props }: KanbanBadgeProps) {
+function KanbanBadge({
+  variant,
+  className,
+  ...props
+}: KanbanBadgeProps & VariantProps<typeof badgeVariants>) {
   return (
     <KanbanBadgePrimitive
       data-slot="kanban-badge"
-      className={cn(
-        "inline-flex items-center justify-center",
-        "rounded-full bg-muted px-2 py-1",
-        "text-xs font-medium text-muted-foreground",
-        "h-5 min-w-5",
-        className
-      )}
+      className={cn(badgeVariants({ variant }), className)}
       {...props}
     />
   )
@@ -273,6 +315,21 @@ function KanbanBadge({ className, ...props }: KanbanBadgeProps) {
 // ─────────────────────────────────────────────
 // KanbanDropZone
 // ─────────────────────────────────────────────
+
+const dropZoneVariants = cva(
+  "flex h-20 items-center justify-center rounded-lg border-2 border-dashed transition-colors",
+  {
+    variants: {
+      active: {
+        true: "border-primary bg-primary/10 text-primary",
+        false: "border-primary/50 bg-primary/5 text-muted-foreground",
+      },
+    },
+    defaultVariants: {
+      active: false,
+    },
+  }
+)
 
 function KanbanDropZonePrimitive({
   render,
@@ -286,23 +343,18 @@ function KanbanDropZonePrimitive({
 }
 
 function KanbanDropZone({
+  active,
   className,
   children,
   ...props
-}: KanbanDropZoneProps) {
+}: KanbanDropZoneProps & VariantProps<typeof dropZoneVariants>) {
   return (
     <KanbanDropZonePrimitive
       data-slot="kanban-drop-zone"
-      className={cn(
-        "rounded-lg border-2 border-dashed border-primary/50",
-        "flex h-20 items-center justify-center bg-primary/5",
-        className
-      )}
+      className={cn(dropZoneVariants({ active }), className)}
       {...props}
     >
-      {children ?? (
-        <span className="text-xs text-muted-foreground">Drop here</span>
-      )}
+      {children ?? <span className="text-xs">Drop here</span>}
     </KanbanDropZonePrimitive>
   )
 }

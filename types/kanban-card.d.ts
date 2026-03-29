@@ -15,8 +15,14 @@ export type KanbanCardFooterProps = useRender.ComponentProps<"div">
 
 export type KanbanScrollAreaProps = useRender.ComponentProps<"div">
 
-export type KanbanAddCardProps = useRender.ComponentProps<"button">
+export interface KanbanAddCardProps extends useRender.ComponentProps<"button"> {
+  variant?: "dashed" | "solid" | "ghost"
+}
 
-export type KanbanBadgeProps = useRender.ComponentProps<"span">
+export interface KanbanBadgeProps extends useRender.ComponentProps<"span"> {
+  variant?: "default" | "success" | "warning" | "destructive"
+}
 
-export type KanbanDropZoneProps = useRender.ComponentProps<"div">
+export interface KanbanDropZoneProps extends useRender.ComponentProps<"div"> {
+  active?: boolean
+}
