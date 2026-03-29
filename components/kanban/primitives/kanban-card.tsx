@@ -177,7 +177,7 @@ function KanbanCardFooter({ className, ...props }: KanbanCardFooterProps) {
 // ─────────────────────────────────────────────
 
 const scrollAreaVariants = cva(
-  "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border flex-1 overflow-auto",
+  "scrollbar-thin flex-1 space-y-2 scrollbar-thumb-border scrollbar-track-transparent",
   {
     variants: {
       axis: {
