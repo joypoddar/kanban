@@ -3,7 +3,7 @@ import { KanbanBoardProps } from "@/types/kanban-board"
 import { mergeProps, useRender } from "@base-ui/react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-const boardVariants = cva("flex overflow-x-auto pb-4", {
+const boardVariants = cva("flex overflow-x-auto", {
   variants: {
     spacing: {
       none: "gap-0",
