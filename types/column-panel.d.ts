@@ -5,6 +5,7 @@ export interface ColumnPanelProps extends useRender.ComponentProps<"div"> {
   variant?: "default" | "ghost" | "bordered"
   collapsed?: boolean
   onToggle?: () => void
+  cardCount?: number
 }
 
 export type ColumnHeaderProps = useRender.ComponentProps<"div">

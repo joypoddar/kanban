@@ -26,3 +26,7 @@ export interface KanbanBadgeProps extends useRender.ComponentProps<"span"> {
 export interface KanbanDropZoneProps extends useRender.ComponentProps<"div"> {
   active?: boolean
 }
+
+export interface KanbanAddColumnProps extends useRender.ComponentProps<"button"> {
+  variant?: "ghost" | "dashed"
+}

@@ -61,6 +61,7 @@ const columnVariantClasses = cva(
 interface ColumnPanelContextValue {
   collapsed: boolean
   onToggle?: () => void
+  cardCount?: number
 }
 
 const ColumnPanelContext = React.createContext<ColumnPanelContextValue>({
@@ -90,16 +91,22 @@ function ColumnPanel({
   variant,
   collapsed = false,
   onToggle,
+  cardCount,
   className,
   children,
   ...props
 }: ColumnPanelProps) {
+  const collapsedHeight = collapsed
+    ? Math.max(120, (cardCount ?? 0) * 72 + 60)
+    : undefined
+
   return (
-    <ColumnPanelContext.Provider value={{ collapsed, onToggle }}>
+    <ColumnPanelContext.Provider value={{ collapsed, onToggle, cardCount }}>
       <ColumnPanelPrimitive
         data-slot="column-panel"
         data-collapsed={collapsed}
         className={cn(columnVariantClasses({ variant, collapsed }), className)}
+        style={collapsedHeight !== undefined ? { height: collapsedHeight } : undefined}
         {...props}
       >
         {children}
@@ -140,7 +147,9 @@ function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
           : undefined
       }
       className={cn(
-        "@container/column-header flex items-center justify-between p-4 pb-2",
+        collapsed
+          ? "@container/column-header flex h-full flex-col-reverse items-center py-3"
+          : "@container/column-header flex items-center justify-between p-4 pb-2",
         isHeaderTrigger && "cursor-pointer select-none",
         className
       )}
@@ -218,11 +227,15 @@ function ColumnTitlePrimitive({ render, ...otherProps }: ColumnTitleProps) {
 }
 
 function ColumnTitle({ className, ...props }: ColumnTitleProps) {
+  const { collapsed } = useColumnToggle()
+
   return (
     <ColumnTitlePrimitive
       data-slot="column-title"
       className={cn(
-        "flex-1 truncate text-sm leading-none font-semibold tracking-tight text-foreground",
+        collapsed
+          ? "flex-1 [writing-mode:vertical-rl] text-sm font-semibold tracking-tight text-foreground mt-2"
+          : "flex-1 truncate text-sm leading-none font-semibold tracking-tight text-foreground",
         className
       )}
       {...props}
