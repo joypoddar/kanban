@@ -14,6 +14,7 @@ import { mergeProps, useRender } from "@base-ui/react"
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
 import * as React from "react"
+import { useKanbanBoard } from "./kanban-board"
 
 // ─────────────────────────────────────────────
 // Variants
@@ -60,12 +61,14 @@ const columnVariantClasses = cva(
 
 interface ColumnPanelContextValue {
   collapsed: boolean
+  collapsible: boolean
   onToggle?: () => void
   cardCount?: number
 }
 
 const ColumnPanelContext = React.createContext<ColumnPanelContextValue>({
   collapsed: false,
+  collapsible: true,
 })
 
 function useColumnToggle() {
@@ -89,22 +92,35 @@ function ColumnPanelPrimitive({
 
 function ColumnPanel({
   variant,
-  collapsed = false,
-  onToggle,
+  id,
+  collapsed: collapsedProp = false,
+  collapsible = true,
+  onToggle: onToggleProp,
   cardCount,
   className,
   children,
   ...props
 }: ColumnPanelProps) {
+  const boardCtx = useKanbanBoard()
+  const collapsed =
+    id !== undefined && boardCtx
+      ? (boardCtx.collapsed[id] ?? false)
+      : collapsedProp
+  const onToggle =
+    id !== undefined && boardCtx
+      ? () => boardCtx.toggleColumn(id)
+      : onToggleProp
+
   const collapsedHeight = collapsed
     ? Math.max(120, (cardCount ?? 0) * 72 + 60)
     : undefined
 
   return (
-    <ColumnPanelContext.Provider value={{ collapsed, onToggle, cardCount }}>
+    <ColumnPanelContext.Provider value={{ collapsed, collapsible, onToggle, cardCount }}>
       <ColumnPanelPrimitive
         data-slot="column-panel"
         data-collapsed={collapsed}
+        id={id}
         className={cn(columnVariantClasses({ variant, collapsed }), className)}
         style={collapsedHeight !== undefined ? { height: collapsedHeight } : undefined}
         {...props}
@@ -128,8 +144,8 @@ function ColumnHeaderPrimitive({ render, ...otherProps }: ColumnHeaderProps) {
 }
 
 function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
-  const { collapsed, onToggle } = useColumnToggle()
-  const isHeaderTrigger = collapsed
+  const { collapsed, collapsible, onToggle } = useColumnToggle()
+  const isHeaderTrigger = collapsed && collapsible
 
   return (
     <ColumnHeaderPrimitive
@@ -291,7 +307,8 @@ function ColumnTogglePrimitive({
 }
 
 function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
-  const { collapsed, onToggle } = useColumnToggle()
+  const { collapsed, collapsible, onToggle } = useColumnToggle()
+  if (!collapsible || collapsed) return null
 
   return (
     <ColumnTogglePrimitive
