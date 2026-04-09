@@ -34,7 +34,7 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
 })
 
 const columnVariantClasses = cva(
-  "flex w-full min-w-80 flex-col rounded-lg border transition-all duration-200",
+  "flex w-80 flex-col rounded-lg border transition-all duration-200",
   {
     variants: {
       variant: {
@@ -169,10 +169,12 @@ function ColumnContent({
   className,
   ...props
 }: ColumnContentProps) {
+  const { collapsed } = useColumnToggle()
+
   return (
     <ColumnContentPrimitive
       data-slot="column-content"
-      className={cn(bodySpacing({ spacing }), className)}
+      className={cn(bodySpacing({ spacing }), collapsed && "hidden", className)}
       {...props}
     />
   )
