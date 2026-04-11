@@ -1,6 +1,9 @@
+"use client"
+
 import { cn } from "@/lib/utils"
 import {
   KanbanAddCardProps,
+  KanbanAddColumnProps,
   KanbanCardDescriptionProps,
   KanbanCardFooterProps,
   KanbanCardHeaderProps,
@@ -13,6 +16,20 @@ import {
 import { mergeProps, useRender } from "@base-ui/react"
 import { PlusIcon } from "@phosphor-icons/react"
 import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react"
+import { CSS } from "@dnd-kit/utilities"
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { useKanbanBoard } from "./kanban-board"
+
+// ─────────────────────────────────────────────
+// KanbanScrollContext — provides columnId to child cards
+// ─────────────────────────────────────────────
+
+const KanbanScrollContext = React.createContext<string | null>(null)
 
 // ─────────────────────────────────────────────
 // KanbanCard
@@ -51,16 +68,48 @@ function KanbanCardPrimitive({
 }
 
 function KanbanCard({
+  id,
   variant,
   draggable = false,
   className,
+  style,
   ...props
 }: KanbanCardProps & VariantProps<typeof cardVariants>) {
+  const boardCtx = useKanbanBoard()
+  const columnId = React.useContext(KanbanScrollContext)
+  const dndEnabled = boardCtx?.dndEnabled ?? false
+  const sortableEnabled = draggable && dndEnabled && !!id && !!columnId
+
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: id ?? "__disabled__",
+    disabled: !sortableEnabled,
+    data: { columnId },
+  })
+
+  const sortableStyle: React.CSSProperties = sortableEnabled
+    ? { transform: CSS.Transform.toString(transform), transition }
+    : {}
+
   return (
     <KanbanCardPrimitive
+      ref={sortableEnabled ? setNodeRef : undefined}
       data-slot="kanban-card"
-      draggable={draggable ?? false}
-      className={cn(cardVariants({ variant, draggable }), className)}
+      draggable={!dndEnabled && draggable}
+      className={cn(
+        cardVariants({ variant, draggable }),
+        sortableEnabled && isDragging && "opacity-50",
+        className
+      )}
+      style={{ ...sortableStyle, ...style }}
+      {...(sortableEnabled ? attributes : {})}
+      {...(sortableEnabled ? listeners : {})}
       {...props}
     />
   )
@@ -195,7 +244,7 @@ const scrollAreaVariants = cva(
 function KanbanScrollAreaPrimitive({
   render,
   ...otherProps
-}: Omit<KanbanScrollAreaProps, "axis">) {
+}: Omit<KanbanScrollAreaProps, "axis" | "items" | "columnId">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -205,16 +254,34 @@ function KanbanScrollAreaPrimitive({
 
 function KanbanScrollArea({
   axis,
+  items,
+  columnId,
   className,
   ...props
 }: KanbanScrollAreaProps & VariantProps<typeof scrollAreaVariants>) {
-  return (
-    <KanbanScrollAreaPrimitive
-      data-slot="kanban-scroll-area"
-      className={cn(scrollAreaVariants({ axis }), className)}
-      {...props}
-    />
+  const boardCtx = useKanbanBoard()
+  const dndEnabled = boardCtx?.dndEnabled ?? false
+  const sortableActive = dndEnabled && !!items && !!columnId
+
+  const scrollEl = (
+    <KanbanScrollContext.Provider value={columnId ?? null}>
+      <KanbanScrollAreaPrimitive
+        data-slot="kanban-scroll-area"
+        className={cn(scrollAreaVariants({ axis }), className)}
+        {...props}
+      />
+    </KanbanScrollContext.Provider>
   )
+
+  if (sortableActive) {
+    return (
+      <SortableContext items={items!} strategy={verticalListSortingStrategy}>
+        {scrollEl}
+      </SortableContext>
+    )
+  }
+
+  return scrollEl
 }
 
 // ─────────────────────────────────────────────

@@ -1,3 +1,4 @@
+import * as React from "react"
 import { useRender } from "@base-ui/react"
 
 export interface KanbanBoardColumnMeta {
@@ -9,10 +10,21 @@ export interface KanbanBoardContextValue {
   collapsed: Record<string, boolean>
   toggleColumn: (id: string) => void
   addColumn: (id: string, collapsible?: boolean) => void
+  activeCardId: string | null
+  overColumnId: string | null
+  dndEnabled: boolean
 }
 
 export interface KanbanBoardProps extends useRender.ComponentProps<"div"> {
   spacing?: "none" | "sm" | "md" | "lg"
   maxOpen?: number
   columns?: KanbanBoardColumnMeta[]
+  onCardMove?: (
+    cardId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    newIndex: number
+  ) => void
+  allowReorder?: boolean
+  renderDragOverlay?: (activeCardId: string) => React.ReactNode
 }

@@ -6,6 +6,19 @@ import {
   KanbanBoardContextValue,
   KanbanBoardProps,
 } from "@/types/kanban-board"
+import {
+  closestCorners,
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { mergeProps, useRender } from "@base-ui/react"
 import { cva, type VariantProps } from "class-variance-authority"
 import * as React from "react"
@@ -35,6 +48,17 @@ const KanbanBoardContext = React.createContext<KanbanBoardContextValue | null>(
 export function useKanbanBoard() {
   return React.useContext(KanbanBoardContext)
 }
+
+// ─────────────────────────────────────────────
+// DnD helpers
+// ─────────────────────────────────────────────
+
+interface DndState {
+  activeCardId: string | null
+  overColumnId: string | null
+}
+
+const DRAG_ACTIVATION_DISTANCE = 8
 
 // ─────────────────────────────────────────────
 // Init helpers
@@ -82,6 +106,9 @@ function KanbanBoard({
   spacing,
   maxOpen,
   columns: columnsMeta = [],
+  onCardMove,
+  allowReorder = false,
+  renderDragOverlay,
   className,
   children,
   ...props
@@ -92,6 +119,22 @@ function KanbanBoard({
 
   const [state, setState] = React.useState(() =>
     computeInitialState(columnsMeta, maxOpen)
+  )
+
+  const [dndState, setDndState] = React.useState<DndState>({
+    activeCardId: null,
+    overColumnId: null,
+  })
+
+  const dndEnabled = onCardMove !== undefined
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   )
 
   const toggleColumn = React.useCallback(
@@ -150,10 +193,75 @@ function KanbanBoard({
     [maxOpen]
   )
 
-  return (
-    <KanbanBoardContext.Provider
-      value={{ collapsed: state.collapsed, toggleColumn, addColumn }}
-    >
+  function handleDragStart(event: DragStartEvent) {
+    const cardId = event.active.id as string
+    setDndState((prev) => ({ ...prev, activeCardId: cardId }))
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const overId = event.over?.id as string | undefined
+    if (!overId) {
+      setDndState((prev) => ({ ...prev, overColumnId: null }))
+      return
+    }
+    // Resolve to column: if hovering a card, use its columnId data; else overId is a column
+    const resolvedColumnId =
+      (event.over?.data.current?.columnId as string | undefined) ?? overId
+    setDndState((prev) => ({ ...prev, overColumnId: resolvedColumnId }))
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setDndState((prev) => ({
+      ...prev,
+      activeCardId: null,
+      overColumnId: null,
+    }))
+
+    if (!over || !onCardMove) return
+
+    const cardId = active.id as string
+    const fromColumnId = active.data.current?.columnId as string | undefined
+    const toColumnId =
+      (over.data.current?.columnId as string | undefined) ?? (over.id as string)
+
+    if (!fromColumnId || !toColumnId) return
+    if (!allowReorder && fromColumnId === toColumnId) return
+
+    const overIndex =
+      (over.data.current?.sortable?.index as number | undefined) ?? 0
+    onCardMove(cardId, fromColumnId, toColumnId, overIndex)
+  }
+
+  function handleDragCancel() {
+    setDndState((prev) => ({
+      ...prev,
+      activeCardId: null,
+      overColumnId: null,
+    }))
+  }
+
+  const contextValue = React.useMemo<KanbanBoardContextValue>(
+    () => ({
+      collapsed: state.collapsed,
+      toggleColumn,
+      addColumn,
+      activeCardId: dndState.activeCardId,
+      overColumnId: dndState.overColumnId,
+      dndEnabled,
+    }),
+    [
+      state.collapsed,
+      toggleColumn,
+      addColumn,
+      dndState.activeCardId,
+      dndState.overColumnId,
+      dndEnabled,
+    ]
+  )
+
+  const board = (
+    <KanbanBoardContext.Provider value={contextValue}>
       <KanbanBoardPrimitive
         data-slot="kanban-board"
         className={cn(boardVariants({ spacing }), className)}
@@ -161,7 +269,29 @@ function KanbanBoard({
       >
         {children}
       </KanbanBoardPrimitive>
+      {dndEnabled && (
+        <DragOverlay>
+          {dndState.activeCardId
+            ? (renderDragOverlay?.(dndState.activeCardId) ?? null)
+            : null}
+        </DragOverlay>
+      )}
     </KanbanBoardContext.Provider>
+  )
+
+  if (!dndEnabled) return board
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      {board}
+    </DndContext>
   )
 }
 

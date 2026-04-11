@@ -10,6 +10,7 @@ import {
   ColumnTitleProps,
   ColumnToggleProps,
 } from "@/types/column-panel"
+import { useDroppable } from "@dnd-kit/core"
 import { mergeProps, useRender } from "@base-ui/react"
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
@@ -111,6 +112,12 @@ function ColumnPanel({
       ? () => boardCtx.toggleColumn(id)
       : onToggleProp
 
+  const dndEnabled = boardCtx?.dndEnabled ?? false
+  const isOver = dndEnabled && id !== undefined && boardCtx?.overColumnId === id
+  const isActive = dndEnabled && boardCtx?.activeCardId !== null
+
+  const { setNodeRef } = useDroppable({ id: id ?? "" })
+
   const collapsedHeight = collapsed
     ? Math.max(120, (cardCount ?? 0) * 72 + 60)
     : undefined
@@ -118,10 +125,15 @@ function ColumnPanel({
   return (
     <ColumnPanelContext.Provider value={{ collapsed, collapsible, onToggle, cardCount }}>
       <ColumnPanelPrimitive
+        ref={dndEnabled && id ? setNodeRef : undefined}
         data-slot="column-panel"
         data-collapsed={collapsed}
         id={id}
-        className={cn(columnVariantClasses({ variant, collapsed }), className)}
+        className={cn(
+          columnVariantClasses({ variant, collapsed }),
+          isActive && isOver && !collapsed && "ring-2 ring-primary/30",
+          className
+        )}
         style={collapsedHeight !== undefined ? { height: collapsedHeight } : undefined}
         {...props}
       >

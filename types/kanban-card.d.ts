@@ -1,6 +1,7 @@
 import { useRender } from "@base-ui/react"
 
 export interface KanbanCardProps extends useRender.ComponentProps<"div"> {
+  id?: string
   variant?: "default" | "ghost" | "outlined"
   draggable?: boolean
 }
@@ -13,7 +14,10 @@ export type KanbanCardDescriptionProps = useRender.ComponentProps<"p">
 
 export type KanbanCardFooterProps = useRender.ComponentProps<"div">
 
-export type KanbanScrollAreaProps = useRender.ComponentProps<"div">
+export interface KanbanScrollAreaProps extends useRender.ComponentProps<"div"> {
+  items?: string[]
+  columnId?: string
+}
 
 export interface KanbanAddCardProps extends useRender.ComponentProps<"button"> {
   variant?: "dashed" | "solid" | "ghost"
