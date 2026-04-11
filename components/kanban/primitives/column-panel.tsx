@@ -123,7 +123,9 @@ function ColumnPanel({
     : undefined
 
   return (
-    <ColumnPanelContext.Provider value={{ collapsed, collapsible, onToggle, cardCount }}>
+    <ColumnPanelContext.Provider
+      value={{ collapsed, collapsible, onToggle, cardCount }}
+    >
       <ColumnPanelPrimitive
         ref={dndEnabled && id ? setNodeRef : undefined}
         data-slot="column-panel"
@@ -131,10 +133,14 @@ function ColumnPanel({
         id={id}
         className={cn(
           columnVariantClasses({ variant, collapsed }),
-          isActive && isOver && !collapsed && "ring-2 ring-primary/30",
+          isActive && isOver && "border-primary bg-primary/5",
           className
         )}
-        style={collapsedHeight !== undefined ? { height: collapsedHeight } : undefined}
+        style={
+          collapsedHeight !== undefined
+            ? { height: collapsedHeight }
+            : undefined
+        }
         {...props}
       >
         {children}
@@ -262,7 +268,7 @@ function ColumnTitle({ className, ...props }: ColumnTitleProps) {
       data-slot="column-title"
       className={cn(
         collapsed
-          ? "flex-1 [writing-mode:vertical-rl] text-sm font-semibold tracking-tight text-foreground mt-2"
+          ? "mt-2 flex-1 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
           : "flex-1 truncate text-sm leading-none font-semibold tracking-tight text-foreground",
         className
       )}

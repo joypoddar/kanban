@@ -7,7 +7,6 @@ import {
   KanbanBoardProps,
 } from "@/types/kanban-board"
 import {
-  closestCorners,
   DndContext,
   DragEndEvent,
   DragOverEvent,
@@ -15,6 +14,8 @@ import {
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
@@ -107,6 +108,9 @@ function KanbanBoard({
   maxOpen,
   columns: columnsMeta = [],
   onCardMove,
+  onCardDragOver,
+  onDragStart: onDragStartProp,
+  onDragCancel: onDragCancelProp,
   allowReorder = false,
   renderDragOverlay,
   className,
@@ -126,7 +130,12 @@ function KanbanBoard({
     overColumnId: null,
   })
 
-  const dndEnabled = onCardMove !== undefined
+  const dndEnabled = onCardMove !== undefined || onCardDragOver !== undefined
+
+  // Track the original column of the dragged card (before any optimistic moves)
+  const originalActiveColumnIdRef = React.useRef<string | null>(null)
+  // Track which column was last entered — deduplicate onCardDragOver calls
+  const overColumnIdRef = React.useRef<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -195,6 +204,10 @@ function KanbanBoard({
 
   function handleDragStart(event: DragStartEvent) {
     const cardId = event.active.id as string
+    originalActiveColumnIdRef.current =
+      (event.active.data.current?.columnId as string | undefined) ?? null
+    overColumnIdRef.current = null
+    onDragStartProp?.()
     setDndState((prev) => ({ ...prev, activeCardId: cardId }))
   }
 
@@ -202,12 +215,23 @@ function KanbanBoard({
     const overId = event.over?.id as string | undefined
     if (!overId) {
       setDndState((prev) => ({ ...prev, overColumnId: null }))
+      overColumnIdRef.current = null
       return
     }
-    // Resolve to column: if hovering a card, use its columnId data; else overId is a column
     const resolvedColumnId =
       (event.over?.data.current?.columnId as string | undefined) ?? overId
     setDndState((prev) => ({ ...prev, overColumnId: resolvedColumnId }))
+
+    if (!onCardDragOver) return
+    // Only fire when entering a new column (deduplicate hover events)
+    if (overColumnIdRef.current === resolvedColumnId) return
+    overColumnIdRef.current = resolvedColumnId
+
+    const cardId = event.active.id as string
+    const fromColumnId = event.active.data.current?.columnId as string | undefined
+    // Skip if same column — useSortable handles same-column preview natively
+    if (!fromColumnId || fromColumnId === resolvedColumnId) return
+    onCardDragOver(cardId, fromColumnId, resolvedColumnId, Number.MAX_SAFE_INTEGER)
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -218,22 +242,38 @@ function KanbanBoard({
       overColumnId: null,
     }))
 
-    if (!over || !onCardMove) return
+    if (!over) {
+      // Dropped on empty space — revert any optimistic moves
+      onDragCancelProp?.()
+      return
+    }
+
+    if (!onCardMove) return
 
     const cardId = active.id as string
+    // Use live data: after optimistic moves this reflects the card's current column
     const fromColumnId = active.data.current?.columnId as string | undefined
     const toColumnId =
       (over.data.current?.columnId as string | undefined) ?? (over.id as string)
 
     if (!fromColumnId || !toColumnId) return
-    if (!allowReorder && fromColumnId === toColumnId) return
+
+    // Bypass same-column allowReorder check when the card was originally from a
+    // different column (it was moved there optimistically via onCardDragOver)
+    const originalFromColumnId = originalActiveColumnIdRef.current
+    const wasOriginallyDifferentColumn =
+      originalFromColumnId !== null && originalFromColumnId !== toColumnId
+
+    if (!allowReorder && fromColumnId === toColumnId && !wasOriginallyDifferentColumn) return
 
     const overIndex =
-      (over.data.current?.sortable?.index as number | undefined) ?? 0
+      (over.data.current?.sortable?.index as number | undefined) ??
+      Number.MAX_SAFE_INTEGER
     onCardMove(cardId, fromColumnId, toColumnId, overIndex)
   }
 
   function handleDragCancel() {
+    onDragCancelProp?.()
     setDndState((prev) => ({
       ...prev,
       activeCardId: null,
@@ -284,7 +324,13 @@ function KanbanBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={(args) => {
+        // Prefer pointer-inside detection; fall back to rect overlap.
+        // This ensures empty-space drops return null (no column match).
+        const pointer = pointerWithin(args)
+        if (pointer.length > 0) return pointer
+        return rectIntersection(args)
+      }}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}

@@ -25,6 +25,14 @@ export interface KanbanBoardProps extends useRender.ComponentProps<"div"> {
     toColumnId: string,
     newIndex: number
   ) => void
+  onCardDragOver?: (
+    cardId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    newIndex: number
+  ) => void
+  onDragStart?: () => void
+  onDragCancel?: () => void
   allowReorder?: boolean
   renderDragOverlay?: (activeCardId: string) => React.ReactNode
 }
