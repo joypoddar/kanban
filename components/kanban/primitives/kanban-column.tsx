@@ -38,7 +38,7 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
 })
 
 const columnVariantClasses = cva(
-  "relative flex w-80 flex-col rounded-lg border transition-all duration-200",
+  "relative flex w-80 flex-col rounded-full border transition-all duration-200",
   {
     variants: {
       variant: {
@@ -91,10 +91,10 @@ function KanbanColumnCollapsedOverlay({ cardCount }: { cardCount?: number }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center">
       <div
-        className={cn("w-full rounded-full bg-linear-to-b from-muted from-50%")}
+        className="w-full rounded-full bg-linear-to-b from-muted from-50% transition-colors duration-200 group-hover/column:from-muted-foreground/25"
         style={{ height: `${collapsedHeight}px` }}
       />
-      <div className="w-px flex-1 bg-border" />
+      <div className="w-px flex-1 bg-border transition-colors duration-200 group-hover/column:bg-muted-foreground/25" />
     </div>
   )
 }
@@ -150,9 +150,11 @@ function KanbanColumn({
         data-slot="column-panel"
         data-collapsed={collapsed}
         id={id}
+        onClick={collapsed ? onToggle : undefined}
         className={cn(
           columnVariantClasses({ variant, collapsed }),
           isActive && isOver && "border-primary bg-primary/5",
+          collapsed && "group/column cursor-pointer",
           className
         )}
         {...props}
@@ -180,29 +182,15 @@ function KanbanColumnHeaderPrimitive({
 }
 
 function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
-  const { collapsed, collapsible, onToggle } = useKanbanColumn()
-  const isHeaderTrigger = collapsed && collapsible
+  const { collapsed } = useKanbanColumn()
 
   return (
     <KanbanColumnHeaderPrimitive
       data-slot="column-header"
-      role={isHeaderTrigger ? "button" : undefined}
-      tabIndex={isHeaderTrigger ? 0 : undefined}
-      aria-expanded={isHeaderTrigger ? !collapsed : undefined}
-      aria-label={isHeaderTrigger ? "Expand column" : undefined}
-      onClick={isHeaderTrigger ? onToggle : undefined}
-      onKeyDown={
-        isHeaderTrigger
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") onToggle?.()
-            }
-          : undefined
-      }
       className={cn(
         collapsed
           ? "@container/column-header flex h-full flex-col items-center py-3"
           : "@container/column-header flex items-center justify-between p-4 pb-2",
-        isHeaderTrigger && "cursor-pointer select-none",
         className
       )}
       {...props}
