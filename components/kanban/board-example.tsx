@@ -2,28 +2,27 @@
 
 import React from "react"
 
-import {
-  ColumnAction,
-  ColumnContent,
-  ColumnFooter,
-  ColumnHeader,
-  ColumnPanel,
-  ColumnTitle,
-  ColumnToggle,
-} from "./primitives/column-panel"
-import { KanbanBoard, useKanbanBoard } from "./primitives/kanban-board"
+import { KanbanBoard } from "./primitives/kanban-board"
 import {
   KanbanAddCard,
-  KanbanAddColumn,
   KanbanBadge,
   KanbanCard,
   KanbanCardDescription,
   KanbanCardFooter,
   KanbanCardHeader,
+  KanbanCardList,
   KanbanCardTitle,
   KanbanDropZone,
-  KanbanScrollArea,
 } from "./primitives/kanban-card"
+import {
+  KanbanColumn,
+  KanbanColumnAction,
+  KanbanColumnContent,
+  KanbanColumnFooter,
+  KanbanColumnHeader,
+  KanbanColumnTitle,
+  KanbanColumnToggle,
+} from "./primitives/kanban-column"
 
 // ─────────────────────────────────────────────
 // Types
@@ -139,23 +138,6 @@ const initialColumns: Column[] = [
 ]
 
 // ─────────────────────────────────────────────
-// Add column handler (needs board context, must be rendered inside KanbanBoard)
-// ─────────────────────────────────────────────
-
-function AddColumnHandler({ onAdd }: { onAdd: (id: string) => void }) {
-  const board = useKanbanBoard()
-  return (
-    <KanbanAddColumn
-      onClick={() => {
-        const id = `col-${Date.now()}`
-        onAdd(id)
-        board?.addColumn(id)
-      }}
-    />
-  )
-}
-
-// ─────────────────────────────────────────────
 // Example
 // ─────────────────────────────────────────────
 
@@ -251,23 +233,23 @@ export function KanbanBoardExample() {
       renderDragOverlay={renderDragOverlay}
     >
       {columns.map((column) => (
-        <ColumnPanel
+        <KanbanColumn
           key={column.id}
           id={column.id}
           variant={column.variant}
           collapsible={column.collapsible ?? true}
           cardCount={column.cards.length}
         >
-          <ColumnHeader>
-            <ColumnTitle>{column.title}</ColumnTitle>
-            <ColumnAction>
+          <KanbanColumnHeader>
+            <KanbanColumnTitle>{column.title}</KanbanColumnTitle>
+            <KanbanColumnAction>
               <KanbanBadge>{column.cards.length}</KanbanBadge>
-              <ColumnToggle />
-            </ColumnAction>
-          </ColumnHeader>
+              <KanbanColumnToggle />
+            </KanbanColumnAction>
+          </KanbanColumnHeader>
 
-          <ColumnContent>
-            <KanbanScrollArea
+          <KanbanColumnContent>
+            <KanbanCardList
               columnId={column.id}
               items={column.cards.map((c) => c.id)}
             >
@@ -288,22 +270,14 @@ export function KanbanBoardExample() {
               ))}
 
               {column.id === "in-progress" && <KanbanDropZone />}
-            </KanbanScrollArea>
+            </KanbanCardList>
 
-            <ColumnFooter>
+            <KanbanColumnFooter>
               <KanbanAddCard onClick={() => {}} />
-            </ColumnFooter>
-          </ColumnContent>
-        </ColumnPanel>
+            </KanbanColumnFooter>
+          </KanbanColumnContent>
+        </KanbanColumn>
       ))}
-      <AddColumnHandler
-        onAdd={(id) =>
-          setColumns((prev) => [
-            ...prev,
-            { id, title: "New Column", variant: "default", cards: [] },
-          ])
-        }
-      />
     </KanbanBoard>
   )
 }

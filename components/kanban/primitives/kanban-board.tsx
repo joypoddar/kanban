@@ -108,6 +108,7 @@ function KanbanBoard({
   spacing,
   maxOpen,
   columns: columnsMeta = [],
+  dndEnabled: dndEnabledProp,
   onCardMove,
   onCardDragOver,
   onDragStart: onDragStartProp,
@@ -131,7 +132,8 @@ function KanbanBoard({
     overColumnId: null,
   })
 
-  const dndEnabled = onCardMove !== undefined || onCardDragOver !== undefined
+  const dndEnabled =
+    dndEnabledProp ?? (onCardMove !== undefined || onCardDragOver !== undefined)
 
   // Track the original column of the dragged card (before any optimistic moves)
   const originalActiveColumnIdRef = React.useRef<string | null>(null)
@@ -252,6 +254,8 @@ function KanbanBoard({
 
     if (!over) {
       // Dropped on empty space — revert any optimistic moves
+      originalActiveColumnIdRef.current = null
+      overColumnIdRef.current = null
       onDragCancelProp?.()
       return
     }
@@ -269,6 +273,8 @@ function KanbanBoard({
     // Bypass same-column allowReorder check when the card was originally from a
     // different column (it was moved there optimistically via onCardDragOver)
     const originalFromColumnId = originalActiveColumnIdRef.current
+    originalActiveColumnIdRef.current = null
+    overColumnIdRef.current = null
     const wasOriginallyDifferentColumn =
       originalFromColumnId !== null && originalFromColumnId !== toColumnId
 
@@ -286,6 +292,8 @@ function KanbanBoard({
   }
 
   function handleDragCancel() {
+    originalActiveColumnIdRef.current = null
+    overColumnIdRef.current = null
     onDragCancelProp?.()
     setDndState((prev) => ({
       ...prev,

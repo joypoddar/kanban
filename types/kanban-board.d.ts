@@ -19,6 +19,7 @@ export interface KanbanBoardProps extends useRender.ComponentProps<"div"> {
   spacing?: "none" | "sm" | "md" | "lg"
   maxOpen?: number
   columns?: KanbanBoardColumnMeta[]
+  dndEnabled?: boolean
   onCardMove?: (
     cardId: string,
     fromColumnId: string,

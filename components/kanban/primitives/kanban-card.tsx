@@ -13,14 +13,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import {
   KanbanAddCardProps,
+  KanbanAddColumnProps,
   KanbanBadgeProps,
   KanbanCardDescriptionProps,
   KanbanCardFooterProps,
   KanbanCardHeaderProps,
+  KanbanCardListProps,
   KanbanCardProps,
   KanbanCardTitleProps,
   KanbanDropZoneProps,
-  KanbanScrollAreaProps,
 } from "@/types/kanban-card"
 import { cn } from "@/lib/utils"
 
@@ -242,10 +243,10 @@ const scrollAreaVariants = cva(
   }
 )
 
-function KanbanScrollAreaPrimitive({
+function KanbanCardListPrimitive({
   render,
   ...otherProps
-}: Omit<KanbanScrollAreaProps, "axis" | "items" | "columnId">) {
+}: Omit<KanbanCardListProps, "axis" | "items" | "columnId">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -253,20 +254,20 @@ function KanbanScrollAreaPrimitive({
   })
 }
 
-function KanbanScrollArea({
+function KanbanCardList({
   axis,
   items,
   columnId,
   className,
   ...props
-}: KanbanScrollAreaProps & VariantProps<typeof scrollAreaVariants>) {
+}: KanbanCardListProps & VariantProps<typeof scrollAreaVariants>) {
   const boardCtx = useKanbanBoard()
   const dndEnabled = boardCtx?.dndEnabled ?? false
   const sortableActive = dndEnabled && !!items && !!columnId
 
   const scrollEl = (
     <KanbanScrollContext.Provider value={columnId ?? null}>
-      <KanbanScrollAreaPrimitive
+      <KanbanCardListPrimitive
         data-slot="kanban-scroll-area"
         className={cn(scrollAreaVariants({ axis }), className)}
         {...props}
@@ -437,7 +438,7 @@ export {
   KanbanCardTitle,
   KanbanCardDescription,
   KanbanCardFooter,
-  KanbanScrollArea,
+  KanbanCardList,
   KanbanAddCard,
   KanbanBadge,
   KanbanDropZone,

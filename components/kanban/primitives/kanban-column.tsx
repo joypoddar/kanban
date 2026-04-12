@@ -7,14 +7,14 @@ import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
 
 import {
-  ColumnActionProps,
-  ColumnContentProps,
-  ColumnFooterProps,
-  ColumnHeaderProps,
-  ColumnPanelProps,
-  ColumnTitleProps,
-  ColumnToggleProps,
-} from "@/types/column-panel"
+  KanbanColumnActionProps,
+  KanbanColumnContentProps,
+  KanbanColumnFooterProps,
+  KanbanColumnHeaderProps,
+  KanbanColumnProps,
+  KanbanColumnTitleProps,
+  KanbanColumnToggleProps,
+} from "@/types/kanban-column"
 import { cn } from "@/lib/utils"
 
 import { useKanbanBoard } from "./kanban-board"
@@ -62,30 +62,30 @@ const columnVariantClasses = cva(
 // Context
 // ─────────────────────────────────────────────
 
-interface ColumnPanelContextValue {
+interface KanbanColumnContextValue {
   collapsed: boolean
   collapsible: boolean
   onToggle?: () => void
   cardCount?: number
 }
 
-const ColumnPanelContext = React.createContext<ColumnPanelContextValue>({
+const KanbanColumnContext = React.createContext<KanbanColumnContextValue>({
   collapsed: false,
   collapsible: true,
 })
 
-function useColumnToggle() {
-  return React.useContext(ColumnPanelContext)
+function useKanbanColumn() {
+  return React.useContext(KanbanColumnContext)
 }
 
 // ─────────────────────────────────────────────
 // ColumnPanel
 // ─────────────────────────────────────────────
 
-function ColumnPanelPrimitive({
+function KanbanColumnPrimitive({
   render,
   ...otherProps
-}: Omit<ColumnPanelProps, "variant" | "collapsed" | "onToggle">) {
+}: Omit<KanbanColumnProps, "variant" | "collapsed" | "onToggle">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -93,7 +93,7 @@ function ColumnPanelPrimitive({
   })
 }
 
-function ColumnPanel({
+function KanbanColumn({
   variant,
   id,
   collapsed: collapsedProp = false,
@@ -103,7 +103,7 @@ function ColumnPanel({
   className,
   children,
   ...props
-}: ColumnPanelProps) {
+}: KanbanColumnProps) {
   const boardCtx = useKanbanBoard()
   const collapsed =
     id !== undefined && boardCtx
@@ -125,10 +125,10 @@ function ColumnPanel({
     : undefined
 
   return (
-    <ColumnPanelContext.Provider
+    <KanbanColumnContext.Provider
       value={{ collapsed, collapsible, onToggle, cardCount }}
     >
-      <ColumnPanelPrimitive
+      <KanbanColumnPrimitive
         ref={dndEnabled && id ? setNodeRef : undefined}
         data-slot="column-panel"
         data-collapsed={collapsed}
@@ -146,8 +146,8 @@ function ColumnPanel({
         {...props}
       >
         {children}
-      </ColumnPanelPrimitive>
-    </ColumnPanelContext.Provider>
+      </KanbanColumnPrimitive>
+    </KanbanColumnContext.Provider>
   )
 }
 
@@ -155,7 +155,10 @@ function ColumnPanel({
 // ColumnHeader
 // ─────────────────────────────────────────────
 
-function ColumnHeaderPrimitive({ render, ...otherProps }: ColumnHeaderProps) {
+function KanbanColumnHeaderPrimitive({
+  render,
+  ...otherProps
+}: KanbanColumnHeaderProps) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -163,12 +166,12 @@ function ColumnHeaderPrimitive({ render, ...otherProps }: ColumnHeaderProps) {
   })
 }
 
-function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
-  const { collapsed, collapsible, onToggle } = useColumnToggle()
+function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
+  const { collapsed, collapsible, onToggle } = useKanbanColumn()
   const isHeaderTrigger = collapsed && collapsible
 
   return (
-    <ColumnHeaderPrimitive
+    <KanbanColumnHeaderPrimitive
       data-slot="column-header"
       role={isHeaderTrigger ? "button" : undefined}
       tabIndex={isHeaderTrigger ? 0 : undefined}
@@ -198,10 +201,10 @@ function ColumnHeader({ className, ...props }: ColumnHeaderProps) {
 // ColumnContent
 // ─────────────────────────────────────────────
 
-function ColumnContentPrimitive({
+function KanbanColumnContentPrimitive({
   render,
   ...otherProps
-}: Omit<ColumnContentProps, "spacing">) {
+}: Omit<KanbanColumnContentProps, "spacing">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -209,15 +212,15 @@ function ColumnContentPrimitive({
   })
 }
 
-function ColumnContent({
+function KanbanColumnContent({
   spacing = "md",
   className,
   ...props
-}: ColumnContentProps) {
-  const { collapsed } = useColumnToggle()
+}: KanbanColumnContentProps) {
+  const { collapsed } = useKanbanColumn()
 
   return (
-    <ColumnContentPrimitive
+    <KanbanColumnContentPrimitive
       data-slot="column-content"
       className={cn(bodySpacing({ spacing }), collapsed && "hidden", className)}
       {...props}
@@ -229,7 +232,10 @@ function ColumnContent({
 // ColumnFooter
 // ─────────────────────────────────────────────
 
-function ColumnFooterPrimitive({ render, ...otherProps }: ColumnFooterProps) {
+function KanbanColumnFooterPrimitive({
+  render,
+  ...otherProps
+}: KanbanColumnFooterProps) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -237,9 +243,9 @@ function ColumnFooterPrimitive({ render, ...otherProps }: ColumnFooterProps) {
   })
 }
 
-function ColumnFooter({ className, ...props }: ColumnFooterProps) {
+function KanbanColumnFooter({ className, ...props }: KanbanColumnFooterProps) {
   return (
-    <ColumnFooterPrimitive
+    <KanbanColumnFooterPrimitive
       data-slot="column-footer"
       className={cn(
         "@container/column-footer flex items-center justify-between p-4 pb-2",
@@ -254,7 +260,10 @@ function ColumnFooter({ className, ...props }: ColumnFooterProps) {
 // ColumnTitle
 // ─────────────────────────────────────────────
 
-function ColumnTitlePrimitive({ render, ...otherProps }: ColumnTitleProps) {
+function KanbanColumnTitlePrimitive({
+  render,
+  ...otherProps
+}: KanbanColumnTitleProps) {
   return useRender({
     defaultTagName: "h3",
     render,
@@ -262,11 +271,11 @@ function ColumnTitlePrimitive({ render, ...otherProps }: ColumnTitleProps) {
   })
 }
 
-function ColumnTitle({ className, ...props }: ColumnTitleProps) {
-  const { collapsed } = useColumnToggle()
+function KanbanColumnTitle({ className, ...props }: KanbanColumnTitleProps) {
+  const { collapsed } = useKanbanColumn()
 
   return (
-    <ColumnTitlePrimitive
+    <KanbanColumnTitlePrimitive
       data-slot="column-title"
       className={cn(
         collapsed
@@ -283,7 +292,10 @@ function ColumnTitle({ className, ...props }: ColumnTitleProps) {
 // ColumnAction
 // ─────────────────────────────────────────────
 
-function ColumnActionPrimitive({ render, ...otherProps }: ColumnActionProps) {
+function KanbanColumnActionPrimitive({
+  render,
+  ...otherProps
+}: KanbanColumnActionProps) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -291,9 +303,9 @@ function ColumnActionPrimitive({ render, ...otherProps }: ColumnActionProps) {
   })
 }
 
-function ColumnAction({ className, ...props }: ColumnActionProps) {
+function KanbanColumnAction({ className, ...props }: KanbanColumnActionProps) {
   return (
-    <ColumnActionPrimitive
+    <KanbanColumnActionPrimitive
       data-slot="column-action"
       className={cn("flex shrink-0 items-center gap-1", className)}
       {...props}
@@ -305,12 +317,12 @@ function ColumnAction({ className, ...props }: ColumnActionProps) {
 // ColumnToggle
 // ─────────────────────────────────────────────
 
-function ColumnTogglePrimitive({
+function KanbanColumnTogglePrimitive({
   render,
   onToggle,
   collapsed,
   ...otherProps
-}: ColumnToggleProps) {
+}: KanbanColumnToggleProps) {
   return useRender({
     defaultTagName: "button",
     render,
@@ -326,12 +338,16 @@ function ColumnTogglePrimitive({
   })
 }
 
-function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
-  const { collapsed, collapsible, onToggle } = useColumnToggle()
+function KanbanColumnToggle({
+  className,
+  children,
+  ...props
+}: KanbanColumnToggleProps) {
+  const { collapsed, collapsible, onToggle } = useKanbanColumn()
   if (!collapsible || collapsed) return null
 
   return (
-    <ColumnTogglePrimitive
+    <KanbanColumnTogglePrimitive
       data-slot="column-toggle"
       collapsed={collapsed}
       onToggle={onToggle}
@@ -351,7 +367,7 @@ function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
         ) : (
           <CaretLeftIcon className="h-4 w-4" />
         ))}
-    </ColumnTogglePrimitive>
+    </KanbanColumnTogglePrimitive>
   )
 }
 
@@ -360,12 +376,12 @@ function ColumnToggle({ className, children, ...props }: ColumnToggleProps) {
 // ─────────────────────────────────────────────
 
 export {
-  ColumnPanel,
-  ColumnHeader,
-  ColumnTitle,
-  ColumnAction,
-  ColumnToggle,
-  ColumnContent,
-  ColumnFooter,
-  useColumnToggle,
+  KanbanColumn,
+  KanbanColumnHeader,
+  KanbanColumnTitle,
+  KanbanColumnAction,
+  KanbanColumnToggle,
+  KanbanColumnContent,
+  KanbanColumnFooter,
+  useKanbanColumn,
 }

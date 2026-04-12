@@ -14,9 +14,10 @@ export type KanbanCardDescriptionProps = useRender.ComponentProps<"p">
 
 export type KanbanCardFooterProps = useRender.ComponentProps<"div">
 
-export interface KanbanScrollAreaProps extends useRender.ComponentProps<"div"> {
+export interface KanbanCardListProps extends useRender.ComponentProps<"div"> {
   items?: string[]
   columnId?: string
+  axis?: "vertical" | "horizontal" | "both"
 }
 
 export interface KanbanAddCardProps extends useRender.ComponentProps<"button"> {
