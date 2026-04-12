@@ -367,7 +367,7 @@ function KanbanAddCard({
 // ─────────────────────────────────────────────
 
 const badgeVariants = cva(
-  "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-2 py-1 text-xs font-medium",
+  "inline-flex size-5 items-center justify-center rounded-full px-2 py-1 text-xs font-medium",
   {
     variants: {
       variant: {
@@ -376,9 +376,14 @@ const badgeVariants = cva(
         warning: "bg-warning/10 text-warning",
         destructive: "bg-destructive/10 text-destructive",
       },
+      collapsed: {
+        true: "bg-transparent text-muted-foreground",
+        false: "",
+      },
     },
     defaultVariants: {
       variant: "default",
+      collapsed: false,
     },
   }
 )
@@ -396,10 +401,12 @@ function KanbanBadge({
   className,
   ...props
 }: KanbanBadgeProps & VariantProps<typeof badgeVariants>) {
+  const { collapsed } = useKanbanColumn()
+
   return (
     <KanbanBadgePrimitive
       data-slot="kanban-badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, collapsed }), className)}
       {...props}
     />
   )
