@@ -13,7 +13,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import {
   KanbanAddCardProps,
-  KanbanAddColumnProps,
   KanbanBadgeProps,
   KanbanCardDescriptionProps,
   KanbanCardFooterProps,
@@ -26,6 +25,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import { useKanbanBoard } from "./kanban-board"
+import { useKanbanColumn } from "./kanban-column"
 
 // ─────────────────────────────────────────────
 // KanbanScrollContext — provides columnId to child cards
@@ -78,9 +78,11 @@ function KanbanCard({
   ...props
 }: KanbanCardProps & VariantProps<typeof cardVariants>) {
   const boardCtx = useKanbanBoard()
+  const columnCtx = useKanbanColumn()
   const columnId = React.useContext(KanbanScrollContext)
   const dndEnabled = boardCtx?.dndEnabled ?? false
-  const sortableEnabled = draggable && dndEnabled && !!id && !!columnId
+  const sortableEnabled =
+    draggable && dndEnabled && !!id && !!columnId && !columnCtx.collapsed
 
   const {
     setNodeRef,
@@ -128,7 +130,7 @@ function KanbanCardHeaderPrimitive({
   return useRender({
     defaultTagName: "div",
     render,
-    props: mergeProps<"div">({}, otherProps),
+    props: mergeProps<"div">({ suppressHydrationWarning: true }, otherProps),
   })
 }
 
@@ -224,10 +226,10 @@ function KanbanCardFooter({ className, ...props }: KanbanCardFooterProps) {
 }
 
 // ─────────────────────────────────────────────
-// KanbanScrollArea
+// KanbanCardList
 // ─────────────────────────────────────────────
 
-const scrollAreaVariants = cva(
+const kanbanCardListVariants = cva(
   "scrollbar-thin flex-1 space-y-2 scrollbar-thumb-border scrollbar-track-transparent",
   {
     variants: {
@@ -260,16 +262,23 @@ function KanbanCardList({
   columnId,
   className,
   ...props
-}: KanbanCardListProps & VariantProps<typeof scrollAreaVariants>) {
+}: KanbanCardListProps & VariantProps<typeof kanbanCardListVariants>) {
   const boardCtx = useKanbanBoard()
+  const columnCtx = useKanbanColumn()
   const dndEnabled = boardCtx?.dndEnabled ?? false
-  const sortableActive = dndEnabled && !!items && !!columnId
+  const isCollapsed = columnCtx.collapsed
+
+  // When collapsed, skip SortableContext entirely — the column's useDroppable
+  // acts as the sole drop target and cards always land at the end of the list.
+  // This avoids zero-rect measurements from display:none items causing the
+  // drag overlay to animate toward the top-left corner.
+  const sortableActive = dndEnabled && !!items && !!columnId && !isCollapsed
 
   const scrollEl = (
     <KanbanScrollContext.Provider value={columnId ?? null}>
       <KanbanCardListPrimitive
         data-slot="kanban-scroll-area"
-        className={cn(scrollAreaVariants({ axis }), className)}
+        className={cn(kanbanCardListVariants({ axis }), className)}
         {...props}
       />
     </KanbanScrollContext.Provider>
