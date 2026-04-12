@@ -1,17 +1,21 @@
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
 
-const jetbrainsMonoHeading = JetBrains_Mono({subsets:['latin'],variable:'--font-heading'});
+import { cn } from "@/lib/utils"
+import { ThemeProvider } from "@/components/theme-provider"
+
+const jetbrainsMonoHeading = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-heading",
+})
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 })
 
-const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'})
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export default function RootLayout({
   children,
@@ -22,7 +26,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontSans.variable, "font-mono", geistMono.variable, jetbrainsMonoHeading.variable)}
+      className={cn(
+        "antialiased",
+        fontSans.variable,
+        "font-mono",
+        geistMono.variable,
+        jetbrainsMonoHeading.variable
+      )}
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>

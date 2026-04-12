@@ -1,6 +1,11 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import * as React from "react"
+import { mergeProps, useRender } from "@base-ui/react"
+import { useDroppable } from "@dnd-kit/core"
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
+import { cva } from "class-variance-authority"
+
 import {
   ColumnActionProps,
   ColumnContentProps,
@@ -10,11 +15,8 @@ import {
   ColumnTitleProps,
   ColumnToggleProps,
 } from "@/types/column-panel"
-import { useDroppable } from "@dnd-kit/core"
-import { mergeProps, useRender } from "@base-ui/react"
-import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
-import { cva } from "class-variance-authority"
-import * as React from "react"
+import { cn } from "@/lib/utils"
+
 import { useKanbanBoard } from "./kanban-board"
 
 // ─────────────────────────────────────────────

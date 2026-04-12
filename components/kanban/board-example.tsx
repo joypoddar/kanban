@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { KanbanBoard, useKanbanBoard } from "./primitives/kanban-board"
+
 import {
   ColumnAction,
   ColumnContent,
@@ -11,6 +11,7 @@ import {
   ColumnTitle,
   ColumnToggle,
 } from "./primitives/column-panel"
+import { KanbanBoard, useKanbanBoard } from "./primitives/kanban-board"
 import {
   KanbanAddCard,
   KanbanAddColumn,
@@ -241,7 +242,7 @@ export function KanbanBoardExample() {
       spacing="md"
       maxOpen={2}
       columns={columns.map((c) => ({ id: c.id, collapsible: c.collapsible }))}
-      className="border border-white"
+      className="border border-dashed border-gray-100/20"
       onCardMove={handleCardMove}
       onCardDragOver={handleCardMove}
       onDragStart={handleDragStart}

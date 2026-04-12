@@ -1,6 +1,5 @@
 import { useRender } from "@base-ui/react"
 
-
 export interface ColumnPanelProps extends useRender.ComponentProps<"div"> {
   variant?: "default" | "ghost" | "bordered"
   collapsed?: boolean

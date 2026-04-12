@@ -1,28 +1,29 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import {
-  KanbanAddCardProps,
-  KanbanAddColumnProps,
-  KanbanCardDescriptionProps,
-  KanbanCardFooterProps,
-  KanbanCardHeaderProps,
-  KanbanCardProps,
-  KanbanCardTitleProps,
-  KanbanBadgeProps,
-  KanbanDropZoneProps,
-  KanbanScrollAreaProps,
-} from "@/types/kanban-card"
-import { mergeProps, useRender } from "@base-ui/react"
-import { PlusIcon } from "@phosphor-icons/react"
-import { cva, type VariantProps } from "class-variance-authority"
 import * as React from "react"
-import { CSS } from "@dnd-kit/utilities"
+import { mergeProps, useRender } from "@base-ui/react"
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { PlusIcon } from "@phosphor-icons/react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import {
+  KanbanAddCardProps,
+  KanbanBadgeProps,
+  KanbanCardDescriptionProps,
+  KanbanCardFooterProps,
+  KanbanCardHeaderProps,
+  KanbanCardProps,
+  KanbanCardTitleProps,
+  KanbanDropZoneProps,
+  KanbanScrollAreaProps,
+} from "@/types/kanban-card"
+import { cn } from "@/lib/utils"
+
 import { useKanbanBoard } from "./kanban-board"
 
 // ─────────────────────────────────────────────
@@ -63,7 +64,7 @@ function KanbanCardPrimitive({
   return useRender({
     defaultTagName: "div",
     render,
-    props: mergeProps<"div">({}, otherProps),
+    props: mergeProps<"div">({ suppressHydrationWarning: true }, otherProps),
   })
 }
 

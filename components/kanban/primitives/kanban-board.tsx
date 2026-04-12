@@ -1,11 +1,7 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import {
-  KanbanBoardColumnMeta,
-  KanbanBoardContextValue,
-  KanbanBoardProps,
-} from "@/types/kanban-board"
+import * as React from "react"
+import { mergeProps, useRender } from "@base-ui/react"
 import {
   DndContext,
   DragEndEvent,
@@ -20,9 +16,14 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { mergeProps, useRender } from "@base-ui/react"
 import { cva, type VariantProps } from "class-variance-authority"
-import * as React from "react"
+
+import {
+  KanbanBoardColumnMeta,
+  KanbanBoardContextValue,
+  KanbanBoardProps,
+} from "@/types/kanban-board"
+import { cn } from "@/lib/utils"
 
 const boardVariants = cva("flex h-full justify-center overflow-x-auto", {
   variants: {
@@ -228,10 +229,17 @@ function KanbanBoard({
     overColumnIdRef.current = resolvedColumnId
 
     const cardId = event.active.id as string
-    const fromColumnId = event.active.data.current?.columnId as string | undefined
+    const fromColumnId = event.active.data.current?.columnId as
+      | string
+      | undefined
     // Skip if same column — useSortable handles same-column preview natively
     if (!fromColumnId || fromColumnId === resolvedColumnId) return
-    onCardDragOver(cardId, fromColumnId, resolvedColumnId, Number.MAX_SAFE_INTEGER)
+    onCardDragOver(
+      cardId,
+      fromColumnId,
+      resolvedColumnId,
+      Number.MAX_SAFE_INTEGER
+    )
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -264,7 +272,12 @@ function KanbanBoard({
     const wasOriginallyDifferentColumn =
       originalFromColumnId !== null && originalFromColumnId !== toColumnId
 
-    if (!allowReorder && fromColumnId === toColumnId && !wasOriginallyDifferentColumn) return
+    if (
+      !allowReorder &&
+      fromColumnId === toColumnId &&
+      !wasOriginallyDifferentColumn
+    )
+      return
 
     const overIndex =
       (over.data.current?.sortable?.index as number | undefined) ??
