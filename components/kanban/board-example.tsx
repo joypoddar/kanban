@@ -38,7 +38,7 @@ type Card = {
 type Column = {
   id: string
   title: string
-  variant: "default" | "ghost" | "bordered"
+  variant: "default" | "bordered" | "borderBg"
   collapsible?: boolean
   cards: Card[]
 }
@@ -84,7 +84,7 @@ const initialColumns: Column[] = [
   {
     id: "in-progress",
     title: "In Progress",
-    variant: "bordered" as const,
+    variant: "default" as const,
     collapsible: false,
     cards: [
       {
@@ -106,7 +106,7 @@ const initialColumns: Column[] = [
   {
     id: "done",
     title: "Done",
-    variant: "bordered" as const,
+    variant: "default" as const,
     cards: [
       {
         id: "8",
@@ -134,6 +134,12 @@ const initialColumns: Column[] = [
         due: "Yesterday",
       },
     ],
+  },
+  {
+    id: "empty",
+    title: "Empty Column",
+    variant: "default" as const,
+    cards: [],
   },
 ]
 
@@ -229,7 +235,6 @@ export function KanbanBoardExample() {
       onCardDragOver={handleCardMove}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
-      allowReorder
       renderDragOverlay={renderDragOverlay}
     >
       {columns.map((column) => (
