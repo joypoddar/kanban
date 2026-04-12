@@ -149,19 +149,26 @@ const initialColumns: Column[] = [
 
 export function KanbanBoardExample() {
   const [columns, setColumns] = React.useState<Column[]>(initialColumns)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [columnSnapshot, setColumnSnapshot] = React.useState<Column[] | null>(
+    null
+  )
 
-  // Saved before drag starts; restored on cancel/empty-space drop
-  const columnsBeforeDragRef = React.useRef<Column[] | null>(null)
+  // During a drag, use the pre-drag snapshot for cardCount so collapsed
+  // column overlay heights don't jump due to optimistic state updates
+  const stableColumns = isDragging ? (columnSnapshot ?? columns) : columns
 
   function handleDragStart() {
-    columnsBeforeDragRef.current = columns
+    setColumnSnapshot(columns)
+    setIsDragging(true)
   }
 
   function handleDragCancel() {
-    if (columnsBeforeDragRef.current !== null) {
-      setColumns(columnsBeforeDragRef.current)
-      columnsBeforeDragRef.current = null
+    if (columnSnapshot !== null) {
+      setColumns(columnSnapshot)
     }
+    setColumnSnapshot(null)
+    setIsDragging(false)
   }
 
   // Used for both onCardDragOver (optimistic) and onCardMove (final).
@@ -207,6 +214,17 @@ export function KanbanBoardExample() {
     })
   }
 
+  function handleCardMoveEnd(
+    cardId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    newIndex: number
+  ) {
+    handleCardMove(cardId, fromColumnId, toColumnId, newIndex)
+    setColumnSnapshot(null)
+    setIsDragging(false)
+  }
+
   function renderDragOverlay(activeCardId: string) {
     const card = columns
       .flatMap((c) => c.cards)
@@ -231,7 +249,7 @@ export function KanbanBoardExample() {
       maxOpen={2}
       columns={columns.map((c) => ({ id: c.id, collapsible: c.collapsible }))}
       className="border border-dashed border-gray-100/20"
-      onCardMove={handleCardMove}
+      onCardMove={handleCardMoveEnd}
       onCardDragOver={handleCardMove}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
@@ -243,7 +261,10 @@ export function KanbanBoardExample() {
           id={column.id}
           variant={column.variant}
           collapsible={column.collapsible ?? true}
-          cardCount={column.cards.length}
+          cardCount={
+            stableColumns.find((c) => c.id === column.id)?.cards.length ??
+            column.cards.length
+          }
         >
           <KanbanColumnHeader>
             <KanbanColumnTitle>{column.title}</KanbanColumnTitle>
