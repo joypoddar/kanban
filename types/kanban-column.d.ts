@@ -1,7 +1,7 @@
 import { useRender } from "@base-ui/react"
 
 export interface KanbanColumnProps extends useRender.ComponentProps<"div"> {
-  variant?: "default" | "ghost" | "bordered"
+  variant?: "default" | "bordered" | "borderBg"
   collapsed?: boolean
   collapsible?: boolean
   onToggle?: () => void

@@ -38,16 +38,16 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
 })
 
 const columnVariantClasses = cva(
-  "flex w-80 flex-col rounded-lg border transition-all duration-200",
+  "relative flex w-80 flex-col rounded-lg border transition-all duration-200",
   {
     variants: {
       variant: {
-        default: "border-border bg-muted/50 shadow-sm",
-        ghost: "border-transparent bg-transparent",
-        bordered: "border-border bg-background shadow-md",
+        default: "border-transparent bg-transparent",
+        bordered: "border-border bg-muted/50 shadow-sm",
+        borderBg: "border-border bg-background shadow-md",
       },
       collapsed: {
-        true: "max-w-15 min-w-15",
+        true: "max-w-10 min-w-10",
         false: "",
       },
     },
@@ -76,6 +76,27 @@ const KanbanColumnContext = React.createContext<KanbanColumnContextValue>({
 
 function useKanbanColumn() {
   return React.useContext(KanbanColumnContext)
+}
+
+// ─────────────────────────────────────────────
+// CollapsedOverlay
+// ─────────────────────────────────────────────
+
+function KanbanColumnCollapsedOverlay({ cardCount }: { cardCount?: number }) {
+  const { collapsed } = useKanbanColumn()
+  const collapsedHeight = collapsed
+    ? Math.max(40, (cardCount ?? 0) * 50)
+    : undefined
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center">
+      <div
+        className={cn("w-full rounded-full bg-linear-to-b from-muted from-50%")}
+        style={{ height: `${collapsedHeight}px` }}
+      />
+      <div className="w-px flex-1 bg-border" />
+    </div>
+  )
 }
 
 // ─────────────────────────────────────────────
@@ -120,10 +141,6 @@ function KanbanColumn({
 
   const { setNodeRef } = useDroppable({ id: id ?? "" })
 
-  const collapsedHeight = collapsed
-    ? Math.max(120, (cardCount ?? 0) * 72 + 60)
-    : undefined
-
   return (
     <KanbanColumnContext.Provider
       value={{ collapsed, collapsible, onToggle, cardCount }}
@@ -138,14 +155,10 @@ function KanbanColumn({
           isActive && isOver && "border-primary bg-primary/5",
           className
         )}
-        style={
-          collapsedHeight !== undefined
-            ? { height: collapsedHeight }
-            : undefined
-        }
         {...props}
       >
-        {children}
+        {collapsed && <KanbanColumnCollapsedOverlay cardCount={cardCount} />}
+        <div className="z-50">{children}</div>
       </KanbanColumnPrimitive>
     </KanbanColumnContext.Provider>
   )
@@ -187,7 +200,7 @@ function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
       }
       className={cn(
         collapsed
-          ? "@container/column-header flex h-full flex-col-reverse items-center py-3"
+          ? "@container/column-header flex h-full flex-col items-center py-3"
           : "@container/column-header flex items-center justify-between p-4 pb-2",
         isHeaderTrigger && "cursor-pointer select-none",
         className
@@ -279,7 +292,7 @@ function KanbanColumnTitle({ className, ...props }: KanbanColumnTitleProps) {
       data-slot="column-title"
       className={cn(
         collapsed
-          ? "mt-2 flex-1 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
+          ? "order-2 mt-2 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
           : "flex-1 truncate text-sm leading-none font-semibold tracking-tight text-foreground",
         className
       )}
