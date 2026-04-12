@@ -17,6 +17,11 @@ const fontSans = Geist({
 
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
+export const metadata = {
+  title: "Kanban Board",
+  description: "A simple kanban board built with React and TypeScript.",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
