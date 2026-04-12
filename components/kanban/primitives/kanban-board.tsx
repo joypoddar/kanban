@@ -310,6 +310,7 @@ function KanbanBoard({
       activeCardId: dndState.activeCardId,
       overColumnId: dndState.overColumnId,
       dndEnabled,
+      allowReorder,
     }),
     [
       state.collapsed,
@@ -318,6 +319,7 @@ function KanbanBoard({
       dndState.activeCardId,
       dndState.overColumnId,
       dndEnabled,
+      allowReorder,
     ]
   )
 

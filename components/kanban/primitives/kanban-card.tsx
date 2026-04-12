@@ -4,6 +4,7 @@ import * as React from "react"
 import { mergeProps, useRender } from "@base-ui/react"
 import {
   SortableContext,
+  SortingStrategy,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
@@ -245,6 +246,10 @@ const kanbanCardListVariants = cva(
   }
 )
 
+// Keeps every item in place — used when allowReorder is false and the active
+// card is being dragged within its own column.
+const noopSortingStrategy: SortingStrategy = () => null
+
 function KanbanCardListPrimitive({
   render,
   ...otherProps
@@ -266,7 +271,17 @@ function KanbanCardList({
   const boardCtx = useKanbanBoard()
   const columnCtx = useKanbanColumn()
   const dndEnabled = boardCtx?.dndEnabled ?? false
+  const allowReorder = boardCtx?.allowReorder ?? true
+  const activeCardId = boardCtx?.activeCardId ?? null
   const isCollapsed = columnCtx.collapsed
+
+  // Suppress the sorting animation when reorder is disabled and the dragged
+  // card belongs to this same column (it can still be dropped into other columns).
+  const isActiveSameColumn =
+    !allowReorder && !!activeCardId && !!items && items.includes(activeCardId)
+  const strategy = isActiveSameColumn
+    ? noopSortingStrategy
+    : verticalListSortingStrategy
 
   // When collapsed, skip SortableContext entirely — the column's useDroppable
   // acts as the sole drop target and cards always land at the end of the list.
@@ -286,7 +301,7 @@ function KanbanCardList({
 
   if (sortableActive) {
     return (
-      <SortableContext items={items!} strategy={verticalListSortingStrategy}>
+      <SortableContext items={items!} strategy={strategy}>
         {scrollEl}
       </SortableContext>
     )

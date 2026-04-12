@@ -13,6 +13,7 @@ export interface KanbanBoardContextValue {
   activeCardId: string | null
   overColumnId: string | null
   dndEnabled: boolean
+  allowReorder: boolean
 }
 
 export interface KanbanBoardProps extends useRender.ComponentProps<"div"> {
