@@ -38,7 +38,7 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
 })
 
 const columnVariantClasses = cva(
-  "relative flex w-80 flex-col rounded-full border transition-all duration-200",
+  "relative flex w-80 flex-col rounded-lg border transition-all duration-200",
   {
     variants: {
       variant: {
@@ -47,7 +47,7 @@ const columnVariantClasses = cva(
         borderBg: "border-border bg-background shadow-md",
       },
       collapsed: {
-        true: "max-w-10 min-w-10",
+        true: "max-w-10 min-w-10 rounded-full",
         false: "",
       },
     },
