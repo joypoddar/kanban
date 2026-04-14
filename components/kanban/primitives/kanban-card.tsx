@@ -354,7 +354,7 @@ function KanbanAddCard({
     >
       {children ?? (
         <>
-          <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="size-4" />
           <span>Add card</span>
         </>
       )}
@@ -406,7 +406,11 @@ function KanbanBadge({
   return (
     <KanbanBadgePrimitive
       data-slot="kanban-badge"
-      className={cn(badgeVariants({ variant, collapsed }), className)}
+      className={cn(
+        badgeVariants({ variant, collapsed }),
+        className,
+        !collapsed && "absolute right-4"
+      )}
       {...props}
     />
   )

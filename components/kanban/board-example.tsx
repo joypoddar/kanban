@@ -269,9 +269,9 @@ export function KanbanBoardExample() {
           <KanbanColumnHeader>
             <KanbanColumnTitle>{column.title}</KanbanColumnTitle>
             <KanbanColumnAction>
-              <KanbanBadge>{column.cards.length}</KanbanBadge>
               <KanbanColumnToggle />
             </KanbanColumnAction>
+            <KanbanBadge>{column.cards.length}</KanbanBadge>
           </KanbanColumnHeader>
 
           <KanbanColumnContent>

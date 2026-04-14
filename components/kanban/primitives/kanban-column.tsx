@@ -37,26 +37,23 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
   },
 })
 
-const columnVariantClasses = cva(
-  "relative flex w-80 flex-col rounded-lg border transition-all duration-200",
-  {
-    variants: {
-      variant: {
-        default: "border-transparent bg-transparent",
-        bordered: "border-border bg-muted/50 shadow-sm",
-        borderBg: "border-border bg-background shadow-md",
-      },
-      collapsed: {
-        true: "max-w-10 min-w-10 rounded-full",
-        false: "",
-      },
+const columnVariantClasses = cva("relative flex w-80 flex-col border", {
+  variants: {
+    variant: {
+      default: "border-transparent bg-transparent",
+      bordered: "border-border bg-muted/50 shadow-sm",
+      borderBg: "border-border bg-background shadow-md",
     },
-    defaultVariants: {
-      variant: "default",
-      collapsed: false,
+    collapsed: {
+      true: "max-w-10 min-w-10 rounded-full",
+      false: "rounded-lg",
     },
-  }
-)
+  },
+  defaultVariants: {
+    variant: "default",
+    collapsed: false,
+  },
+})
 
 // ─────────────────────────────────────────────
 // Context
@@ -190,7 +187,7 @@ function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
       className={cn(
         collapsed
           ? "@container/column-header flex h-full flex-col items-center py-3"
-          : "@container/column-header flex items-center justify-between p-4 pb-2",
+          : "@container/column-header relative flex items-center justify-center p-4 pb-2",
         className
       )}
       {...props}
@@ -281,7 +278,7 @@ function KanbanColumnTitle({ className, ...props }: KanbanColumnTitleProps) {
       className={cn(
         collapsed
           ? "order-2 mt-2 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
-          : "flex-1 truncate text-sm leading-none font-semibold tracking-tight text-foreground",
+          : "truncate text-center text-sm leading-none font-semibold tracking-tight text-foreground",
         className
       )}
       {...props}
@@ -354,7 +351,7 @@ function KanbanColumnToggle({
       onToggle={onToggle}
       className={cn(
         "inline-flex items-center justify-center rounded-md",
-        "h-6 w-6 text-muted-foreground",
+        "size-5 text-muted-foreground",
         "hover:bg-muted hover:text-foreground",
         "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
         "transition-colors",
@@ -364,9 +361,9 @@ function KanbanColumnToggle({
     >
       {children ??
         (collapsed ? (
-          <CaretRightIcon className="h-4 w-4" />
+          <CaretRightIcon className="size-4" />
         ) : (
-          <CaretLeftIcon className="h-4 w-4" />
+          <CaretLeftIcon className="size-4" />
         ))}
     </KanbanColumnTogglePrimitive>
   )
@@ -378,11 +375,11 @@ function KanbanColumnToggle({
 
 export {
   KanbanColumn,
-  KanbanColumnHeader,
-  KanbanColumnTitle,
   KanbanColumnAction,
-  KanbanColumnToggle,
   KanbanColumnContent,
   KanbanColumnFooter,
+  KanbanColumnHeader,
+  KanbanColumnTitle,
+  KanbanColumnToggle,
   useKanbanColumn,
 }
