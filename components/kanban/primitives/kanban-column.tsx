@@ -187,7 +187,7 @@ function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
       className={cn(
         collapsed
           ? "@container/column-header flex h-full flex-col items-center py-3"
-          : "@container/column-header relative flex items-center justify-center p-4 pb-2",
+          : "group/header @container/column-header relative flex items-center justify-center p-4 pb-2",
         className
       )}
       {...props}
@@ -270,15 +270,17 @@ function KanbanColumnTitlePrimitive({
 }
 
 function KanbanColumnTitle({ className, ...props }: KanbanColumnTitleProps) {
-  const { collapsed } = useKanbanColumn()
+  const { collapsed, collapsible, onToggle } = useKanbanColumn()
 
   return (
     <KanbanColumnTitlePrimitive
       data-slot="column-title"
+      onClick={!collapsed && collapsible ? onToggle : undefined}
       className={cn(
         collapsed
           ? "order-2 mt-2 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
           : "truncate text-center text-sm leading-none font-semibold tracking-tight text-foreground",
+        !collapsed && collapsible && "cursor-pointer",
         className
       )}
       {...props}
@@ -352,9 +354,10 @@ function KanbanColumnToggle({
       className={cn(
         "inline-flex items-center justify-center rounded-md",
         "size-5 text-muted-foreground",
+        "opacity-0 group-hover/header:opacity-100",
         "hover:bg-muted hover:text-foreground",
         "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
-        "transition-colors",
+        "transition-all duration-200",
         className
       )}
       {...props}
