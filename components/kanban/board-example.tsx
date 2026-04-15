@@ -20,6 +20,7 @@ import {
   KanbanColumnContent,
   KanbanColumnFooter,
   KanbanColumnHeader,
+  KanbanColumnMenuController,
   KanbanColumnTitle,
   KanbanColumnToggle,
 } from "./primitives/kanban-column"
@@ -40,6 +41,8 @@ type Column = {
   title: string
   variant: "default" | "bordered" | "borderBg"
   collapsible?: boolean
+  editable?: boolean
+  color?: string
   cards: Card[]
 }
 
@@ -49,9 +52,18 @@ type Column = {
 
 const initialColumns: Column[] = [
   {
+    id: "uncategorized",
+    title: "Uncategorized",
+    variant: "default" as const,
+    collapsible: false,
+    editable: false,
+    cards: [],
+  },
+  {
     id: "todo",
     title: "To Do",
     variant: "default" as const,
+    editable: true,
     cards: [
       {
         id: "1",
@@ -85,7 +97,8 @@ const initialColumns: Column[] = [
     id: "in-progress",
     title: "In Progress",
     variant: "default" as const,
-    collapsible: false,
+    collapsible: true,
+    editable: true,
     cards: [
       {
         id: "5",
@@ -107,6 +120,7 @@ const initialColumns: Column[] = [
     id: "done",
     title: "Done",
     variant: "default" as const,
+    editable: true,
     cards: [
       {
         id: "8",
@@ -126,6 +140,7 @@ const initialColumns: Column[] = [
     id: "review",
     title: "In Review",
     variant: "default" as const,
+    editable: true,
     cards: [
       {
         id: "7",
@@ -139,6 +154,7 @@ const initialColumns: Column[] = [
     id: "empty",
     title: "Empty Column",
     variant: "default" as const,
+    editable: true,
     cards: [],
   },
 ]
@@ -225,6 +241,39 @@ export function KanbanBoardExample() {
     setIsDragging(false)
   }
 
+  function handleRenameColumn(id: string, title: string, color: string) {
+    setColumns((prev) =>
+      prev.map((col) => (col.id === id ? { ...col, title, color } : col))
+    )
+  }
+
+  function handleMoveColumn(id: string, direction: "left" | "right") {
+    setColumns((prev) => {
+      const idx = prev.findIndex((col) => col.id === id)
+      if (idx === -1) return prev
+      const swapIdx = direction === "left" ? idx - 1 : idx + 1
+      // Clamp to bounds and never swap with index 0 (Uncategorized)
+      if (swapIdx < 1 || swapIdx >= prev.length) return prev
+      const next = [...prev]
+      ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
+      return next
+    })
+  }
+
+  function handleDeleteColumn(id: string) {
+    setColumns((prev) => {
+      const target = prev.find((col) => col.id === id)
+      if (!target) return prev
+      return prev
+        .map((col) =>
+          col.id === "uncategorized"
+            ? { ...col, cards: [...col.cards, ...target.cards] }
+            : col
+        )
+        .filter((col) => col.id !== id)
+    })
+  }
+
   function renderDragOverlay(activeCardId: string) {
     const card = columns
       .flatMap((c) => c.cards)
@@ -253,20 +302,37 @@ export function KanbanBoardExample() {
       onCardDragOver={handleCardMove}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
+      // allowReorder
       renderDragOverlay={renderDragOverlay}
     >
-      {columns.map((column) => (
+      {columns.map((column, index) => (
         <KanbanColumn
           key={column.id}
           id={column.id}
           variant={column.variant}
           collapsible={column.collapsible ?? true}
+          editable={column.editable ?? true}
+          color={column.color}
           cardCount={
             stableColumns.find((c) => c.id === column.id)?.cards.length ??
             column.cards.length
           }
         >
           <KanbanColumnHeader>
+            {column.editable !== false && (
+              <KanbanColumnMenuController
+                defaultName={column.title}
+                defaultColor={column.color}
+                onRename={(title, color) =>
+                  handleRenameColumn(column.id, title, color)
+                }
+                onMoveLeft={() => handleMoveColumn(column.id, "left")}
+                onMoveRight={() => handleMoveColumn(column.id, "right")}
+                onDelete={() => handleDeleteColumn(column.id)}
+                canMoveLeft={index > 1}
+                canMoveRight={index < columns.length - 1}
+              />
+            )}
             <KanbanColumnTitle>{column.title}</KanbanColumnTitle>
             <KanbanColumnAction>
               <KanbanColumnToggle />
