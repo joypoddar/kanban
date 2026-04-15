@@ -179,6 +179,7 @@ function KanbanColumn({
           columnVariantClasses({ variant, collapsed }),
           isActive && isOver && "border-primary bg-primary/5",
           collapsed && "group/column cursor-pointer",
+          !collapsed && "group/expanded",
           className
         )}
         style={
@@ -189,6 +190,7 @@ function KanbanColumn({
         {...props}
       >
         {collapsed && <KanbanColumnCollapsedOverlay cardCount={cardCount} />}
+        {/* Colored top border. */}
         {!collapsed && color && (
           <div
             aria-hidden
@@ -223,6 +225,7 @@ function KanbanColumnHeader({ className, ...props }: KanbanColumnHeaderProps) {
     <KanbanColumnHeaderPrimitive
       data-slot="column-header"
       className={cn(
+        "relative min-h-11.5",
         collapsed
           ? "@container/column-header flex h-full flex-col items-center py-3"
           : "group/header @container/column-header relative flex items-center justify-center p-4 pb-2",
@@ -317,7 +320,7 @@ function KanbanColumnTitle({ className, ...props }: KanbanColumnTitleProps) {
       className={cn(
         collapsed
           ? "order-2 mt-2 text-sm font-semibold tracking-tight text-foreground [writing-mode:vertical-rl]"
-          : "truncate text-center text-sm leading-none font-semibold tracking-tight text-foreground",
+          : "peer/title truncate text-center text-sm leading-none font-semibold tracking-tight text-foreground",
         !collapsed && collapsible && "cursor-pointer",
         className
       )}
@@ -342,10 +345,16 @@ function KanbanColumnActionPrimitive({
 }
 
 function KanbanColumnAction({ className, ...props }: KanbanColumnActionProps) {
+  const { collapsed } = useKanbanColumn()
   return (
     <KanbanColumnActionPrimitive
       data-slot="column-action"
-      className={cn("flex shrink-0 items-center gap-1", className)}
+      className={cn(
+        "flex shrink-0 items-center gap-1",
+        !collapsed &&
+          "opacity-0 transition-opacity duration-200 peer-hover/title:opacity-100 hover:opacity-100",
+        className
+      )}
       {...props}
     />
   )
@@ -390,12 +399,11 @@ function KanbanColumnToggle({
       collapsed={collapsed}
       onToggle={onToggle}
       className={cn(
-        "inline-flex items-center justify-center rounded-md",
+        "ml-1 inline-flex cursor-pointer items-center justify-center rounded",
         "size-5 text-muted-foreground",
-        "opacity-0 group-hover/header:opacity-100",
         "hover:bg-muted hover:text-foreground",
         "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
-        "transition-all duration-200",
+        "transition-colors duration-200",
         className
       )}
       {...props}
@@ -429,14 +437,14 @@ function KanbanColumnMenu({
     <Menu.Root>
       <Menu.Trigger
         className={cn(
-          "inline-flex items-center justify-center rounded-md",
+          "absolute inset-4 inline-flex items-center justify-center rounded-md",
           "size-5 text-muted-foreground",
-          "opacity-0 group-hover/header:opacity-100",
+          "opacity-0 group-hover/expanded:opacity-100",
           "hover:bg-muted hover:text-foreground",
           "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
           "transition-all duration-200"
         )}
-        aria-label="Column actions"
+        aria-label="Column menu actions"
       >
         <DotsThreeIcon weight="bold" className="size-4" />
       </Menu.Trigger>
