@@ -34,6 +34,17 @@ export interface KanbanColumnDeleteDialogProps {
   onConfirm: () => void
 }
 
+export interface KanbanColumnMenuControllerProps {
+  defaultName?: string
+  defaultColor?: string
+  onRename: (title: string, color: string) => void
+  onMoveLeft?: () => void
+  onMoveRight?: () => void
+  onDelete?: () => void
+  canMoveLeft?: boolean
+  canMoveRight?: boolean
+}
+
 export type KanbanColumnHeaderProps = useRender.ComponentProps<"div">
 
 export type KanbanColumnFooterProps = useRender.ComponentProps<"div">

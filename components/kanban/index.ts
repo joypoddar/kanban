@@ -9,6 +9,7 @@ export {
   KanbanColumnContent,
   KanbanColumnFooter,
   KanbanColumnMenu,
+  KanbanColumnMenuController,
   KanbanColumnEditPopover,
   KanbanColumnDeleteDialog,
   useKanbanColumn,

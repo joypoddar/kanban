@@ -21,6 +21,7 @@ import {
   KanbanColumnEditPopoverProps,
   KanbanColumnFooterProps,
   KanbanColumnHeaderProps,
+  KanbanColumnMenuControllerProps,
   KanbanColumnMenuProps,
   KanbanColumnProps,
   KanbanColumnTitleProps,
@@ -94,7 +95,7 @@ function useKanbanColumn() {
 // ─────────────────────────────────────────────
 
 function KanbanColumnCollapsedOverlay({ cardCount }: { cardCount?: number }) {
-  const { collapsed } = useKanbanColumn()
+  const { collapsed, color } = useKanbanColumn()
   const collapsedHeight = collapsed
     ? Math.max(40, (cardCount ?? 0) * 50)
     : undefined
@@ -102,8 +103,18 @@ function KanbanColumnCollapsedOverlay({ cardCount }: { cardCount?: number }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center">
       <div
-        className="w-full rounded-full bg-linear-to-b from-muted from-50% transition-colors duration-200 group-hover/column:from-muted-foreground/25"
-        style={{ height: `${collapsedHeight}px` }}
+        className={cn(
+          "w-full rounded-full from-50% transition-colors duration-200",
+          !color &&
+            "bg-linear-to-b from-muted group-hover/column:from-muted-foreground/25"
+        )}
+        style={{
+          height: `${collapsedHeight}px`,
+          ...(color && {
+            background: `linear-gradient(to bottom, ${color} 50%, transparent)`,
+            opacity: 0.65,
+          }),
+        }}
       />
       <div className="w-px flex-1 bg-border transition-colors duration-200 group-hover/column:bg-muted-foreground/25" />
     </div>
@@ -170,10 +181,21 @@ function KanbanColumn({
           collapsed && "group/column cursor-pointer",
           className
         )}
+        style={
+          color
+            ? ({ "--column-color": color } as React.CSSProperties)
+            : undefined
+        }
         {...props}
       >
         {collapsed && <KanbanColumnCollapsedOverlay cardCount={cardCount} />}
-        <div className="z-50">{children}</div>
+        {!collapsed && color && (
+          <div
+            aria-hidden
+            className="h-1 w-full shrink-0 rounded-t-lg bg-(--column-color)"
+          />
+        )}
+        <div className="relative z-10">{children}</div>
       </KanbanColumnPrimitive>
     </KanbanColumnContext.Provider>
   )
@@ -419,10 +441,10 @@ function KanbanColumnMenu({
         <DotsThreeIcon weight="bold" className="size-4" />
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Positioner sideOffset={4} align="start">
+        <Menu.Positioner sideOffset={4} align="start" className="z-50">
           <Menu.Popup
             className={cn(
-              "z-50 min-w-44 overflow-hidden rounded-lg border border-border",
+              "min-w-44 overflow-hidden rounded-lg border border-border",
               "bg-popover p-1 text-popover-foreground shadow-md",
               "data-ending-style:opacity-0 data-starting-style:opacity-0",
               "transition-opacity duration-150"
@@ -679,6 +701,58 @@ function KanbanColumnEditPopover({
 }
 
 // ─────────────────────────────────────────────
+// ColumnMenuController
+// Composes Menu + EditPopover + DeleteDialog with internal open state.
+// Reads editable/collapsed from KanbanColumnContext — renders nothing
+// when the column is not editable or is collapsed.
+// ─────────────────────────────────────────────
+
+function KanbanColumnMenuController({
+  defaultName,
+  defaultColor,
+  onRename,
+  onMoveLeft,
+  onMoveRight,
+  onDelete,
+  canMoveLeft = true,
+  canMoveRight = true,
+}: KanbanColumnMenuControllerProps) {
+  const { editable, collapsed } = useKanbanColumn()
+  const [editOpen, setEditOpen] = React.useState(false)
+  const [deleteOpen, setDeleteOpen] = React.useState(false)
+
+  if (!editable || collapsed) return null
+
+  return (
+    <>
+      <KanbanColumnMenu
+        onEdit={() => setEditOpen(true)}
+        onMoveLeft={onMoveLeft}
+        onMoveRight={onMoveRight}
+        onDelete={onDelete ? () => setDeleteOpen(true) : undefined}
+        canMoveLeft={canMoveLeft}
+        canMoveRight={canMoveRight}
+      />
+      <KanbanColumnEditPopover
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        defaultName={defaultName}
+        defaultColor={defaultColor}
+        onSave={onRename}
+      />
+      {onDelete && (
+        <KanbanColumnDeleteDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          columnTitle={defaultName}
+          onConfirm={onDelete}
+        />
+      )}
+    </>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────
 
@@ -691,6 +765,7 @@ export {
   KanbanColumnFooter,
   KanbanColumnHeader,
   KanbanColumnMenu,
+  KanbanColumnMenuController,
   KanbanColumnTitle,
   KanbanColumnToggle,
   useKanbanColumn,
