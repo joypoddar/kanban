@@ -6,6 +6,32 @@ export interface KanbanColumnProps extends useRender.ComponentProps<"div"> {
   collapsible?: boolean
   onToggle?: () => void
   cardCount?: number
+  editable?: boolean
+  color?: string
+}
+
+export interface KanbanColumnMenuProps {
+  onEdit?: () => void
+  onMoveLeft?: () => void
+  onMoveRight?: () => void
+  onDelete?: () => void
+  canMoveLeft?: boolean
+  canMoveRight?: boolean
+}
+
+export interface KanbanColumnEditPopoverProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  defaultName?: string
+  defaultColor?: string
+  onSave: (name: string, color: string) => void
+}
+
+export interface KanbanColumnDeleteDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  columnTitle?: string
+  onConfirm: () => void
 }
 
 export type KanbanColumnHeaderProps = useRender.ComponentProps<"div">

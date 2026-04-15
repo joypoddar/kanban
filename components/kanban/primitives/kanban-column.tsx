@@ -2,15 +2,26 @@
 
 import * as React from "react"
 import { mergeProps, useRender } from "@base-ui/react"
+import { Menu } from "@base-ui/react/menu"
+import { Popover } from "@base-ui/react/popover"
 import { useDroppable } from "@dnd-kit/core"
-import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
+import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  DotsThreeIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from "@phosphor-icons/react"
 import { cva } from "class-variance-authority"
 
 import {
   KanbanColumnActionProps,
   KanbanColumnContentProps,
+  KanbanColumnDeleteDialogProps,
+  KanbanColumnEditPopoverProps,
   KanbanColumnFooterProps,
   KanbanColumnHeaderProps,
+  KanbanColumnMenuProps,
   KanbanColumnProps,
   KanbanColumnTitleProps,
   KanbanColumnToggleProps,
@@ -64,11 +75,14 @@ interface KanbanColumnContextValue {
   collapsible: boolean
   onToggle?: () => void
   cardCount?: number
+  editable: boolean
+  color?: string
 }
 
 const KanbanColumnContext = React.createContext<KanbanColumnContextValue>({
   collapsed: false,
   collapsible: true,
+  editable: true,
 })
 
 function useKanbanColumn() {
@@ -118,6 +132,8 @@ function KanbanColumn({
   collapsible = true,
   onToggle: onToggleProp,
   cardCount,
+  editable = true,
+  color,
   className,
   children,
   ...props
@@ -140,7 +156,7 @@ function KanbanColumn({
 
   return (
     <KanbanColumnContext.Provider
-      value={{ collapsed, collapsible, onToggle, cardCount }}
+      value={{ collapsed, collapsible, onToggle, cardCount, editable, color }}
     >
       <KanbanColumnPrimitive
         ref={dndEnabled && id ? setNodeRef : undefined}
@@ -373,6 +389,296 @@ function KanbanColumnToggle({
 }
 
 // ─────────────────────────────────────────────
+// ColumnMenu
+// ─────────────────────────────────────────────
+
+function KanbanColumnMenu({
+  onEdit,
+  onMoveLeft,
+  onMoveRight,
+  onDelete,
+  canMoveLeft = true,
+  canMoveRight = true,
+}: KanbanColumnMenuProps) {
+  const { collapsed, editable } = useKanbanColumn()
+  if (!editable || collapsed) return null
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        className={cn(
+          "inline-flex items-center justify-center rounded-md",
+          "size-5 text-muted-foreground",
+          "opacity-0 group-hover/header:opacity-100",
+          "hover:bg-muted hover:text-foreground",
+          "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
+          "transition-all duration-200"
+        )}
+        aria-label="Column actions"
+      >
+        <DotsThreeIcon weight="bold" className="size-4" />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner sideOffset={4} align="start">
+          <Menu.Popup
+            className={cn(
+              "z-50 min-w-44 overflow-hidden rounded-lg border border-border",
+              "bg-popover p-1 text-popover-foreground shadow-md",
+              "data-ending-style:opacity-0 data-starting-style:opacity-0",
+              "transition-opacity duration-150"
+            )}
+          >
+            <Menu.Item
+              onClick={onEdit}
+              className={cn(
+                "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5",
+                "text-sm text-foreground outline-none",
+                "data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+              )}
+            >
+              <PencilSimpleIcon className="size-3.5" />
+              Edit column
+            </Menu.Item>
+            <Menu.Item
+              onClick={onMoveLeft}
+              disabled={!canMoveLeft}
+              className={cn(
+                "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5",
+                "text-sm text-foreground outline-none",
+                "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                "data-disabled:cursor-default data-disabled:opacity-40"
+              )}
+            >
+              <CaretLeftIcon className="size-3.5" />
+              Move to the left
+            </Menu.Item>
+            <Menu.Item
+              onClick={onMoveRight}
+              disabled={!canMoveRight}
+              className={cn(
+                "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5",
+                "text-sm text-foreground outline-none",
+                "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                "data-disabled:cursor-default data-disabled:opacity-40"
+              )}
+            >
+              <CaretRightIcon className="size-3.5" />
+              Move to the right
+            </Menu.Item>
+            <Menu.Separator className="my-1 h-px bg-border" />
+            <Menu.Item
+              onClick={onDelete}
+              className={cn(
+                "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5",
+                "text-sm text-destructive outline-none",
+                "data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
+              )}
+            >
+              <TrashIcon className="size-3.5" />
+              Delete column
+            </Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  )
+}
+
+// ─────────────────────────────────────────────
+// ColumnDeleteDialog
+// ─────────────────────────────────────────────
+
+function KanbanColumnDeleteDialog({
+  open,
+  onOpenChange,
+  columnTitle,
+  onConfirm,
+}: KanbanColumnDeleteDialogProps) {
+  return (
+    <dialog
+      open={open}
+      aria-modal
+      className={cn(
+        "fixed inset-0 z-50 m-auto h-fit w-80 rounded-lg border border-border",
+        "bg-popover p-5 text-popover-foreground shadow-xl",
+        "backdrop:bg-black/50"
+      )}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onOpenChange(false)
+      }}
+    >
+      <h2 className="mb-1 text-sm font-semibold text-foreground">
+        Delete &ldquo;{columnTitle}&rdquo;?
+      </h2>
+      <p className="mb-4 text-xs text-muted-foreground">
+        All cards will be moved to Uncategorized.
+      </p>
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-xs font-medium",
+            "border border-border text-foreground",
+            "transition-colors hover:bg-muted"
+          )}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            onConfirm()
+            onOpenChange(false)
+          }}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-xs font-medium",
+            "text-destructive-foreground bg-destructive",
+            "transition-colors hover:bg-destructive/90"
+          )}
+        >
+          Delete
+        </button>
+      </div>
+    </dialog>
+  )
+}
+
+// ─────────────────────────────────────────────
+// ColumnEditPopover
+// ─────────────────────────────────────────────
+
+const PRESET_COLORS = [
+  "var(--kanban-color-1)",
+  "var(--kanban-color-2)",
+  "var(--kanban-color-3)",
+  "var(--kanban-color-4)",
+  "var(--kanban-color-5)",
+  "var(--kanban-color-6)",
+  "var(--kanban-color-7)",
+  "var(--kanban-color-8)",
+]
+
+function KanbanColumnEditPopover({
+  open,
+  onOpenChange,
+  defaultName = "",
+  defaultColor = PRESET_COLORS[0],
+  onSave,
+}: KanbanColumnEditPopoverProps) {
+  const [name, setName] = React.useState(defaultName)
+  const [color, setColor] = React.useState(defaultColor)
+
+  // Sync when popover opens with new defaults
+  React.useEffect(() => {
+    if (open) {
+      setName(defaultName)
+      setColor(defaultColor)
+    }
+  }, [open, defaultName, defaultColor])
+
+  return (
+    <Popover.Root open={open} onOpenChange={onOpenChange}>
+      {/* Invisible trigger — opened imperatively from the menu */}
+      <Popover.Trigger
+        aria-hidden
+        className="pointer-events-none absolute size-0 overflow-hidden"
+      />
+      <Popover.Portal>
+        <Popover.Positioner
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          className="isolate z-50"
+        >
+          <Popover.Popup
+            className={cn(
+              "flex w-56 flex-col gap-2.5 rounded-lg p-3",
+              "bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10",
+              "origin-(--transform-origin) duration-100",
+              "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+              "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+            )}
+          >
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && name.trim()) {
+                  onSave(name.trim(), color)
+                  onOpenChange(false)
+                }
+                if (e.key === "Escape") onOpenChange(false)
+              }}
+              placeholder="Column name"
+              autoFocus
+              className={cn(
+                "w-full rounded-md border border-border bg-background",
+                "px-2.5 py-1.5 text-sm text-foreground",
+                "placeholder:text-muted-foreground",
+                "focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none",
+                "transition-colors"
+              )}
+            />
+            <div className="grid grid-cols-4 gap-1.5">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  aria-label={c}
+                  className={cn(
+                    "h-8 w-full rounded-md transition-transform hover:scale-110",
+                    color === c &&
+                      "ring-2 ring-white ring-offset-1 ring-offset-popover"
+                  )}
+                  style={{ backgroundColor: c }}
+                >
+                  {color === c && (
+                    <svg
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      className="mx-auto size-3 text-white drop-shadow"
+                    >
+                      <path
+                        d="M2 6l3 3 5-5"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled={!name.trim()}
+              onClick={() => {
+                if (name.trim()) {
+                  onSave(name.trim(), color)
+                  onOpenChange(false)
+                }
+              }}
+              className={cn(
+                "w-full rounded-md px-3 py-1.5 text-sm font-medium",
+                "bg-primary text-primary-foreground",
+                "transition-colors hover:bg-primary/90",
+                "disabled:cursor-not-allowed disabled:opacity-50"
+              )}
+            >
+              Save changes
+            </button>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────
 
@@ -380,8 +686,11 @@ export {
   KanbanColumn,
   KanbanColumnAction,
   KanbanColumnContent,
+  KanbanColumnDeleteDialog,
+  KanbanColumnEditPopover,
   KanbanColumnFooter,
   KanbanColumnHeader,
+  KanbanColumnMenu,
   KanbanColumnTitle,
   KanbanColumnToggle,
   useKanbanColumn,

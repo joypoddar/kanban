@@ -8,6 +8,9 @@ export {
   KanbanColumnToggle,
   KanbanColumnContent,
   KanbanColumnFooter,
+  KanbanColumnMenu,
+  KanbanColumnEditPopover,
+  KanbanColumnDeleteDialog,
   useKanbanColumn,
 } from "./primitives/kanban-column"
 

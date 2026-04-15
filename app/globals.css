@@ -38,6 +38,14 @@
     --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
     --sidebar-border: oklch(0.925 0.005 214.3);
     --sidebar-ring: oklch(0.723 0.014 214.4);
+    --kanban-color-1: oklch(0.62 0.15 234);
+    --kanban-color-2: oklch(0.60 0.03 220);
+    --kanban-color-3: oklch(0.60 0.07 60);
+    --kanban-color-4: oklch(0.60 0.14 145);
+    --kanban-color-5: oklch(0.68 0.14 50);
+    --kanban-color-6: oklch(0.68 0.13 120);
+    --kanban-color-7: oklch(0.65 0.10 210);
+    --kanban-color-8: oklch(0.55 0.18 295);
 }
 
 .dark {
@@ -72,6 +80,14 @@
     --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.56 0.021 213.5);
+    --kanban-color-1: oklch(0.55 0.15 234);
+    --kanban-color-2: oklch(0.52 0.03 220);
+    --kanban-color-3: oklch(0.52 0.07 60);
+    --kanban-color-4: oklch(0.52 0.14 145);
+    --kanban-color-5: oklch(0.60 0.14 50);
+    --kanban-color-6: oklch(0.60 0.13 120);
+    --kanban-color-7: oklch(0.57 0.10 210);
+    --kanban-color-8: oklch(0.48 0.18 295);
 }
 
 @theme inline {
@@ -85,6 +101,14 @@
     --color-sidebar-primary: var(--sidebar-primary);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
+    --color-kanban-1: var(--kanban-color-1);
+    --color-kanban-2: var(--kanban-color-2);
+    --color-kanban-3: var(--kanban-color-3);
+    --color-kanban-4: var(--kanban-color-4);
+    --color-kanban-5: var(--kanban-color-5);
+    --color-kanban-6: var(--kanban-color-6);
+    --color-kanban-7: var(--kanban-color-7);
+    --color-kanban-8: var(--kanban-color-8);
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
