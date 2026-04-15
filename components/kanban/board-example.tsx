@@ -52,6 +52,14 @@ type Column = {
 
 const initialColumns: Column[] = [
   {
+    id: "backlog",
+    title: "Backlog",
+    variant: "default" as const,
+    collapsible: true,
+    editable: false,
+    cards: [],
+  },
+  {
     id: "uncategorized",
     title: "Uncategorized",
     variant: "default" as const,
@@ -252,8 +260,8 @@ export function KanbanBoardExample() {
       const idx = prev.findIndex((col) => col.id === id)
       if (idx === -1) return prev
       const swapIdx = direction === "left" ? idx - 1 : idx + 1
-      // Clamp to bounds and never swap with index 0 (Uncategorized)
-      if (swapIdx < 1 || swapIdx >= prev.length) return prev
+      // Clamp to bounds and never swap with index 0 or 1 (Backlog, Uncategorized)
+      if (swapIdx < 2 || swapIdx >= prev.length) return prev
       const next = [...prev]
       ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
       return next
@@ -329,7 +337,7 @@ export function KanbanBoardExample() {
                 onMoveLeft={() => handleMoveColumn(column.id, "left")}
                 onMoveRight={() => handleMoveColumn(column.id, "right")}
                 onDelete={() => handleDeleteColumn(column.id)}
-                canMoveLeft={index > 1}
+                canMoveLeft={index > 2}
                 canMoveRight={index < columns.length - 1}
               />
             )}
