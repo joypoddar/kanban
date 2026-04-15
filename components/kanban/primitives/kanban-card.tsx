@@ -283,6 +283,12 @@ function KanbanCardList({
     ? noopSortingStrategy
     : verticalListSortingStrategy
 
+  // Stabilize the items array reference so SortableContext's internal useEffect
+  // only fires when the contents actually change, not on every render.
+  const itemsKey = items?.join("\0") ?? ""
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableItems = React.useMemo(() => items ?? [], [itemsKey])
+
   // When collapsed, skip SortableContext entirely — the column's useDroppable
   // acts as the sole drop target and cards always land at the end of the list.
   // This avoids zero-rect measurements from display:none items causing the
@@ -301,7 +307,7 @@ function KanbanCardList({
 
   if (sortableActive) {
     return (
-      <SortableContext items={items!} strategy={strategy}>
+      <SortableContext items={stableItems} strategy={strategy}>
         {scrollEl}
       </SortableContext>
     )
