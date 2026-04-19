@@ -25,19 +25,22 @@ import {
 } from "@/types/kanban-board"
 import { cn } from "@/lib/utils"
 
-const boardVariants = cva("flex h-full justify-center overflow-x-auto", {
-  variants: {
-    spacing: {
-      none: "gap-0",
-      sm: "gap-2",
-      md: "gap-4",
-      lg: "gap-6",
+const boardVariants = cva(
+  "mx-auto flex h-screen max-w-7xl justify-center overflow-x-auto",
+  {
+    variants: {
+      spacing: {
+        none: "gap-0",
+        sm: "gap-2",
+        md: "gap-4",
+        lg: "gap-6",
+      },
     },
-  },
-  defaultVariants: {
-    spacing: "md",
-  },
-})
+    defaultVariants: {
+      spacing: "md",
+    },
+  }
+)
 
 // ─────────────────────────────────────────────
 // Context
@@ -327,10 +330,16 @@ function KanbanBoard({
     <KanbanBoardContext.Provider value={contextValue}>
       <KanbanBoardPrimitive
         data-slot="kanban-board"
-        className={cn(boardVariants({ spacing }), className)}
+        className={cn(
+          boardVariants({ spacing }),
+          "overflow-x-auto overflow-y-hidden",
+          className
+        )}
         {...props}
       >
-        {children}
+        <div className="flex h-full min-w-max justify-center gap-[inherit]">
+          {children}
+        </div>
       </KanbanBoardPrimitive>
       {dndEnabled && (
         <DragOverlay>
