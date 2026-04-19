@@ -49,23 +49,26 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
   },
 })
 
-const columnVariantClasses = cva("relative flex w-80 flex-col border", {
-  variants: {
-    variant: {
-      default: "border-transparent bg-transparent",
-      bordered: "border-border bg-muted/50 shadow-sm",
-      borderBg: "border-border bg-background shadow-md",
+const columnVariantClasses = cva(
+  "relative flex w-80 min-w-max shrink-0 flex-col border",
+  {
+    variants: {
+      variant: {
+        default: "border-transparent bg-transparent",
+        bordered: "border-border bg-muted/50 shadow-sm",
+        borderBg: "border-border bg-background shadow-md",
+      },
+      collapsed: {
+        true: "max-w-10 min-w-10 rounded-full",
+        false: "rounded-lg",
+      },
     },
-    collapsed: {
-      true: "max-w-10 min-w-10 rounded-full",
-      false: "rounded-lg",
+    defaultVariants: {
+      variant: "default",
+      collapsed: false,
     },
-  },
-  defaultVariants: {
-    variant: "default",
-    collapsed: false,
-  },
-})
+  }
+)
 
 // ─────────────────────────────────────────────
 // Context
