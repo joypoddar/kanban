@@ -5,7 +5,7 @@ import { KanbanBoardExample } from "@/components/kanban/board-example"
 
 const Kanban = () => {
   return (
-    <div className="mx-auto h-screen max-w-7xl p-8">
+    <div>
       {/* <ColumnPanel /> */}
       <KanbanBoardExample />
     </div>

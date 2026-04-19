@@ -230,12 +230,10 @@ function KanbanCardFooter({ className, ...props }: KanbanCardFooterProps) {
 // KanbanCardList
 // ─────────────────────────────────────────────
 
-const kanbanCardListVariants = cva(
-  "scrollbar-thin flex-1 space-y-2 scrollbar-thumb-border scrollbar-track-transparent",
-  {
+const kanbanCardListVariants = cva("flex-1 space-y-2", {
     variants: {
       axis: {
-        vertical: "overflow-x-hidden overflow-y-auto",
+      vertical: "overflow-x-hidden overflow-y-visible",
         horizontal: "overflow-x-auto overflow-y-hidden",
         both: "overflow-auto",
       },
@@ -243,8 +241,7 @@ const kanbanCardListVariants = cva(
     defaultVariants: {
       axis: "vertical",
     },
-  }
-)
+})
 
 // Keeps every item in place — used when allowReorder is false and the active
 // card is being dragged within its own column.
