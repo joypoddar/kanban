@@ -72,13 +72,17 @@ function computeInitialState(
 ) {
   const fixed = columns.filter((c) => c.collapsible === false)
   const collapsible = columns.filter((c) => c.collapsible !== false)
+  const defaultCollapsed = collapsible.filter((c) => c.defaultCollapsed)
+  const defaultOpen = collapsible.filter((c) => !c.defaultCollapsed)
   const allowedOpen =
     maxOpen !== undefined
       ? Math.max(0, maxOpen - fixed.length)
       : collapsible.length
-  const openOrder = collapsible.slice(0, allowedOpen).map((c) => c.id)
+  const openOrder = defaultOpen.slice(0, allowedOpen).map((c) => c.id)
   const openSet = new Set(openOrder)
-  const collapsed: Record<string, boolean> = {}
+  const collapsed: Record<string, boolean> = Object.fromEntries(
+    defaultCollapsed.map((c) => [c.id, true])
+  )
   collapsible.forEach((c) => {
     if (!openSet.has(c.id)) collapsed[c.id] = true
   })

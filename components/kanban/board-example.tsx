@@ -304,8 +304,11 @@ export function KanbanBoardExample() {
     <KanbanBoard
       spacing="md"
       maxOpen={2}
-      columns={columns.map((c) => ({ id: c.id, collapsible: c.collapsible }))}
-      className="border border-dashed border-gray-100/20"
+      columns={columns.map((c) => ({
+        id: c.id,
+        collapsible: c.collapsible,
+        defaultCollapsed: c.id === "backlog",
+      }))}
       onCardMove={handleCardMoveEnd}
       onCardDragOver={handleCardMove}
       onDragStart={handleDragStart}

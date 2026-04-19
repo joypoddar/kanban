@@ -4,6 +4,7 @@ import { useRender } from "@base-ui/react"
 export interface KanbanBoardColumnMeta {
   id: string
   collapsible?: boolean
+  defaultCollapsed?: boolean
 }
 
 export interface KanbanBoardContextValue {
