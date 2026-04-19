@@ -25,7 +25,7 @@ import {
 } from "@/types/kanban-board"
 import { cn } from "@/lib/utils"
 
-const boardVariants = cva("mx-auto flex max-w-7xl justify-center", {
+const boardVariants = cva("mx-auto flex max-w-7xl", {
   variants: {
     spacing: {
       none: "gap-0",
@@ -334,7 +334,7 @@ function KanbanBoard({
         )}
         {...props}
       >
-        <div className="flex min-h-screen min-w-max justify-center gap-[inherit]">
+        <div className="mx-auto flex min-h-screen min-w-max justify-center gap-[inherit]">
           {children}
         </div>
       </KanbanBoardPrimitive>
