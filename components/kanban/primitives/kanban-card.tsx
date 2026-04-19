@@ -230,19 +230,6 @@ function KanbanCardFooter({ className, ...props }: KanbanCardFooterProps) {
 // KanbanCardList
 // ─────────────────────────────────────────────
 
-const kanbanCardListVariants = cva("flex-1 space-y-2", {
-    variants: {
-      axis: {
-      vertical: "overflow-x-hidden overflow-y-visible",
-        horizontal: "overflow-x-auto overflow-y-hidden",
-        both: "overflow-auto",
-      },
-    },
-    defaultVariants: {
-      axis: "vertical",
-    },
-})
-
 // Keeps every item in place — used when allowReorder is false and the active
 // card is being dragged within its own column.
 const noopSortingStrategy: SortingStrategy = () => null
@@ -250,7 +237,7 @@ const noopSortingStrategy: SortingStrategy = () => null
 function KanbanCardListPrimitive({
   render,
   ...otherProps
-}: Omit<KanbanCardListProps, "axis" | "items" | "columnId">) {
+}: Omit<KanbanCardListProps, "items" | "columnId">) {
   return useRender({
     defaultTagName: "div",
     render,
@@ -259,12 +246,11 @@ function KanbanCardListPrimitive({
 }
 
 function KanbanCardList({
-  axis,
   items,
   columnId,
   className,
   ...props
-}: KanbanCardListProps & VariantProps<typeof kanbanCardListVariants>) {
+}: KanbanCardListProps) {
   const boardCtx = useKanbanBoard()
   const columnCtx = useKanbanColumn()
   const dndEnabled = boardCtx?.dndEnabled ?? false
@@ -296,7 +282,7 @@ function KanbanCardList({
     <KanbanScrollContext.Provider value={columnId ?? null}>
       <KanbanCardListPrimitive
         data-slot="kanban-scroll-area"
-        className={cn(kanbanCardListVariants({ axis }), className)}
+        className={cn("flex-1 space-y-2", className)}
         {...props}
       />
     </KanbanScrollContext.Provider>
