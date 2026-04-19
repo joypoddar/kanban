@@ -329,7 +329,7 @@ function KanbanBoard({
         data-slot="kanban-board"
         className={cn(
           boardVariants({ spacing }),
-          "w-full overflow-x-auto",
+          "w-full overflow-x-auto overflow-y-hidden",
           className
         )}
         {...props}
