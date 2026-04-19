@@ -35,7 +35,7 @@ import { useKanbanBoard } from "./kanban-board"
 // Variants
 // ─────────────────────────────────────────────
 
-const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
+const bodySpacing = cva("flex min-h-0 flex-1 flex-col", {
   variants: {
     spacing: {
       none: "gap-0 p-0",
@@ -50,7 +50,7 @@ const bodySpacing = cva("flex flex-1 flex-col overflow-hidden", {
 })
 
 const columnVariantClasses = cva(
-  "relative flex w-80 min-w-max shrink-0 flex-col border",
+  "relative flex w-80 min-w-80 shrink-0 flex-col border",
   {
     variants: {
       variant: {
@@ -200,7 +200,9 @@ function KanbanColumn({
             className="h-1 w-full shrink-0 rounded-t-lg bg-(--column-color)"
           />
         )}
-        <div className="relative z-10">{children}</div>
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          {children}
+        </div>
       </KanbanColumnPrimitive>
     </KanbanColumnContext.Provider>
   )

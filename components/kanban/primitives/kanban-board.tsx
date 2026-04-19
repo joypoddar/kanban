@@ -25,22 +25,19 @@ import {
 } from "@/types/kanban-board"
 import { cn } from "@/lib/utils"
 
-const boardVariants = cva(
-  "mx-auto flex h-screen max-w-7xl justify-center overflow-x-auto",
-  {
-    variants: {
-      spacing: {
-        none: "gap-0",
-        sm: "gap-2",
-        md: "gap-4",
-        lg: "gap-6",
-      },
+const boardVariants = cva("mx-auto flex h-full max-w-7xl justify-center", {
+  variants: {
+    spacing: {
+      none: "gap-0",
+      sm: "gap-2",
+      md: "gap-4",
+      lg: "gap-6",
     },
-    defaultVariants: {
-      spacing: "md",
-    },
-  }
-)
+  },
+  defaultVariants: {
+    spacing: "md",
+  },
+})
 
 // ─────────────────────────────────────────────
 // Context
@@ -332,7 +329,7 @@ function KanbanBoard({
         data-slot="kanban-board"
         className={cn(
           boardVariants({ spacing }),
-          "overflow-x-auto overflow-y-hidden",
+          "size-full overflow-x-auto overflow-y-hidden",
           className
         )}
         {...props}
